@@ -1,0 +1,39 @@
+
+Example of usage
+
+./clic 
+Type '\h' to get some help
+clic2> 
+	assign a variable:
+clic2> h1=7
+7.000000
+
+clic2> h2=9
+9.000000
+clic2> c=3.57
+3.570000
+
+	calculate expression:
+clic2> c*(sqrt(h1)+sqrt(h2))
+20.155332
+clic2> 
+
+	reassign h1
+clic2> h1=11
+11.000000
+
+	recalculate expression:
+clic2> c*(sqrt(h1)+sqrt(h2))
+22.550351
+clic2> 
+
+	view variable list:
+clic2> \v
+e = 2.718282 (readonly)
+PI = 3.141593 (readonly)
+h1 = 11.000000
+h2 = 9.000000
+c = 3.570000
+clic2> 
+	exit:
+clic2> \q

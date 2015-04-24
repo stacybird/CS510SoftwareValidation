@@ -7,37 +7,80 @@ set srcdir .
 set DATA_STRUCTURE "./data_structure"
 set timeout 1
 
-set prompt "data_structure2> "
-set unknown "unknown identifier"
-#set unknowncmd "unknown command"
-#set syntax "syntax error"
-#set invalidconst "invalid constant"
-#set conflict "name conflict"
-#set value "you can not change the value"
-#set invalid "invalid variable or function name"
+# variables to start cleaning things up
+set choice "Enter choice: "
+set data "Enter data: "
+set main " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\n"
+set queue "1\r\n\r\n 1 - Push\r\n 2 - Pop\r\n 3 - Top\r\n 4 - Empty\r\n 5 - Exit\r\n 6 - Dipslay\r\n 7 - Stack Count\r\n 8 - Destroy stack\r\n Enter choice : "
 
-spawn $DATA_STRUCTURE;
 
-# fails at rounding up!   {".0000005\r" "0.000001"}
-# TCL seems to hate this as a flag!   {"-\r"        [$syntax]}
-# this is hidden.  without talking to the dev, hard to say what was meant for the menu:
-#    {"\\c\r"      [$prompt]}
-#    {"\\h\r"      [concat "\\v - variable list\r\n\\f - function list\r\n\\q - quit" $prompt]}
-#    {"\\y\r"      [$unknowncmd]}
-#    {")\r"        [$syntax]}
-#    {"foo\r"      [$unknown]}
-#    {"foo=1\r"    "1.000000"}
 
-set testdata {
-    {""           " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\nEnter choice: "}
+# segfaultdata
+set segfaultdata {
+    {""           " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\n"}
+    {""       "Enter choice: "}
+
+    {"1\r"    "1\r\n\r\n 1 - Push\r\n 2 - Pop\r\n 3 - Top\r\n 4 - Empty\r\n 5 - Exit\r\n 6 - Dipslay\r\n 7 - Stack Count\r\n 8 - Destroy stack\r\n Enter choice : "}
+
+    {"1\r"    "Enter data : "}
+    {"123\r"  "Enter choice : "}
+    {"8\r"    "All stack elements destroyed"}
 }
 
+
+
+# stacktestdata
+set stacktestdata {
+    {""           " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\n"}
+    {""       "Enter choice: "}
+
+    {"1\r"    "1\r\n\r\n 1 - Push\r\n 2 - Pop\r\n 3 - Top\r\n 4 - Empty\r\n 5 - Exit\r\n 6 - Dipslay\r\n 7 - Stack Count\r\n 8 - Destroy stack\r\n Enter choice : "}
+
+    {"8\r"    "All stack elements destroyed"}
+    {"1\r"    "Enter data : "}
+    {"abc\r"  "Input was not an integer, try again."}
+    {"123\r"  "Enter choice : "}
+    {"1\r"    "Enter data : "}
+    {"234\r"  "Enter choice : "}
+    {"6\r"    "234 123"}
+    {""       "Enter choice : "}
+    {"7\r"    "No. of elements in stack : 2"}
+    {""       "Enter choice : "}
+    {"3\r"    " Top element : 234"}
+    {"2\r"    " Popped value : 234"}
+
+    {"5\r"    ""}
+}
+
+
+
+# queuetestdata
+set queuetestdata {
+    {""           " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\n"}
+    {""       "Enter choice: "}
+    {"2\r"    " 1 - Enque\r\n 2 - Deque\r\n 3 - Front element\r\n 4 - Empty\r\n 5 - Exit\r\n 6 - Display\r\n 7 - Queue size\r\n Enter choice : "}
+    {"5\r"    ""}
+}
+
+
+
+# listtestdata 
+set listtestdata {
+    {""           " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\n"}
+    {""       "Enter choice: "}
+    {"3\r"    " 1 - Insert at beginning\r\n 2 - Insert at end\r\n 3 - Insert at position i\r\n 4 - Delete at i\r\n 5 - Display from beginning\r\n 6 - Display from end\r\n 7 - Search for element\r\n 8 - Sort the list\r\n 9 - Update an element\r\n 10- Exit\r\n Enter choice : "}
+    {"5\r"    ""}
+}
+
+
+
 # global DATA_STRUCTURE
-foreach pattern $testdata {
+
+# segfault test
+spawn $DATA_STRUCTURE;
+foreach pattern $segfaultdata {
     set inputs   [lindex $pattern 0]
     set expected [lindex $pattern 1]
-
-#    eval "spawn $DATA_STRUCTURE $inputs"
     send $inputs
     expect {
         $expected { pass $inputs }
@@ -45,3 +88,45 @@ foreach pattern $testdata {
         timeout   { puts "Operation timed out!"}
     }
 }
+
+# stack test
+spawn $DATA_STRUCTURE;
+foreach pattern $stacktestdata {
+    set inputs   [lindex $pattern 0]
+    set expected [lindex $pattern 1]
+    send $inputs
+    expect {
+        $expected { pass $inputs }
+        default   { fail $inputs }
+        timeout   { puts "Operation timed out!"}
+    }
+}
+
+# queue test
+spawn $DATA_STRUCTURE;
+foreach pattern $queuetestdata {
+    set inputs   [lindex $pattern 0]
+    set expected [lindex $pattern 1]
+    send $inputs
+    expect {
+        $expected { pass $inputs }
+        default   { fail $inputs }
+        timeout   { puts "Operation timed out!"}
+    }
+}
+
+# double linked list test
+spawn $DATA_STRUCTURE;
+foreach pattern $listtestdata {
+    set inputs   [lindex $pattern 0]
+    set expected [lindex $pattern 1]
+    send $inputs
+    expect {
+        $expected { pass $inputs }
+        default   { fail $inputs }
+        timeout   { puts "Operation timed out!"}
+    }
+}
+
+
+

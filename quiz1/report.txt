@@ -16,3 +16,8 @@ Summary of Project 1
 7. Did you trigger the segmentation fault?  Yes.  I create a test flow just for the seg fault as simple as I could make it.
 
 8. What test case triggered the segmentation fault?  titled segfault.  :-) it was trying to remove a non empty stack.
+
+
+my method for dev:
+run program, add tests, check coverage with this:
+gcov -b -c *.c ; lcov --capture --rc lcov_branch_coverage=1 --directory ./ --output-file coverage.info ; genhtml coverage.info --rc lcov_branch_coverage=1 --output-directory result ; firefox result/index.html 

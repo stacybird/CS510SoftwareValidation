@@ -61,6 +61,7 @@ set queuetestdata {
     {"2\r"    " 1 - Enque\r\n 2 - Deque\r\n 3 - Front element\r\n 4 - Empty\r\n 5 - Exit\r\n 6 - Display\r\n 7 - Queue size\r\n Enter choice : "}
 
     {"7\r"    " Queue size : 0"}
+    {"2\r"    "Error: Trying to display elements from empty queue"}
     {"4\r"    "Queue empty"}
     {"a\r"    "Input was not an integer, try again."}
     {"3\r"    " No front element in Queue as queue is empty"}
@@ -71,6 +72,9 @@ set queuetestdata {
     {"234\r"    ""}
     {"3\r"    "Front element : 123"}
     {"4\r"    "Queue not empty"}
+    {"6\r"    "123 234"}
+    {"7\r"    "Queue size : 2"}
+    {"2\r"    "Dequed value : 123"}
  
     {"5\r"    ""}
 }
@@ -104,6 +108,10 @@ set listtestdata {
     {"9\r"    "Enter node data to be updated :"}
     {"123\r"    "Enter new data :"}
     {"567\r"    " Linked list elements from begining :  567  234"}
+    {"3\r"      "Enter position to be inserted : "}
+    {"1\r"    "Enter value to node :"}
+    {"444\r"    ""}
+    {"5\r" "Linked list elements from begining :  567  444  234"}
     {"123\r"    "Wrong choice menu"}
     {"10\r"    ""}
 }

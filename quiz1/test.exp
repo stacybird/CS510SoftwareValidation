@@ -82,7 +82,16 @@ set listtestdata {
     {""           " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\n"}
     {""       "Enter choice: "}
     {"3\r"    " 1 - Insert at beginning\r\n 2 - Insert at end\r\n 3 - Insert at position i\r\n 4 - Delete at i\r\n 5 - Display from beginning\r\n 6 - Display from end\r\n 7 - Search for element\r\n 8 - Sort the list\r\n 9 - Update an element\r\n 10- Exit\r\n Enter choice : "}
-    {"5\r"    ""}
+    {"4\r"    " Enter position to be deleted :"}
+    {"1\r"    "Error : Position out of range to delete"}
+    {"5\r"    "List empty to display"}
+    {"6\r"    "List empty to display"}
+    {"7\r"    " Error : List empty to search for data"}
+    {"8\r"    " List empty to sort"}
+    {"9\r"    "Enter node data to be updated :"}
+    {"1\r"    "Enter new data :"}
+    {"12\r"    "Error : List empty no node to update"}
+    {"10\r"    ""}
 }
 
 

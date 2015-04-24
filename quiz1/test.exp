@@ -1,0 +1,47 @@
+# Stacy Watts
+# test file for quiz 1, testing the data_structure tool
+# CS 510 pdx.edu  Spring 2015
+
+set tool "data_structure"
+set srcdir .
+set DATA_STRUCTURE "./data_structure"
+set timeout 1
+
+set prompt "data_structure2> "
+set unknown "unknown identifier"
+#set unknowncmd "unknown command"
+#set syntax "syntax error"
+#set invalidconst "invalid constant"
+#set conflict "name conflict"
+#set value "you can not change the value"
+#set invalid "invalid variable or function name"
+
+spawn $DATA_STRUCTURE;
+
+# fails at rounding up!   {".0000005\r" "0.000001"}
+# TCL seems to hate this as a flag!   {"-\r"        [$syntax]}
+# this is hidden.  without talking to the dev, hard to say what was meant for the menu:
+#    {"\\c\r"      [$prompt]}
+#    {"\\h\r"      [concat "\\v - variable list\r\n\\f - function list\r\n\\q - quit" $prompt]}
+#    {"\\y\r"      [$unknowncmd]}
+#    {")\r"        [$syntax]}
+#    {"foo\r"      [$unknown]}
+#    {"foo=1\r"    "1.000000"}
+
+set testdata {
+    {""           " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\nEnter choice: "}
+}
+
+# global DATA_STRUCTURE
+foreach pattern $testdata {
+    set inputs   [lindex $pattern 0]
+    set expected [lindex $pattern 1]
+
+#    eval "spawn $DATA_STRUCTURE $inputs"
+    send $inputs
+    expect {
+        $expected { pass $inputs }
+        default   { fail $inputs }
+        timeout   { puts "Operation timed out!"}
+    }
+}

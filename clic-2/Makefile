@@ -8,7 +8,7 @@ OBJECTS = $(SOURCES:.c=.o)
 TESTLOG = $(SOURCES:.c=.gcno)
 PROGRAM = clic
 LDFLAGS = -ldl -lm -lreadline -lhistory -ltermcap --coverage
-CFLAGS += -Wall --coverage
+CFLAGS += -Wall --coverage -fprofile-arcs -ftest-coverage
 
 all: $(PROGRAM)
 

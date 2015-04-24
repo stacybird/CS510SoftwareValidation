@@ -59,6 +59,19 @@ set queuetestdata {
     {""           " 1 - Test Stack\r\n 2 - Test Queue\r\n 3 - Test Double-Linked List\r\n 4 - Exit\r\n"}
     {""       "Enter choice: "}
     {"2\r"    " 1 - Enque\r\n 2 - Deque\r\n 3 - Front element\r\n 4 - Empty\r\n 5 - Exit\r\n 6 - Display\r\n 7 - Queue size\r\n Enter choice : "}
+
+    {"7\r"    " Queue size : 0"}
+    {"4\r"    "Queue empty"}
+    {"a\r"    "Input was not an integer, try again."}
+    {"3\r"    " No front element in Queue as queue is empty"}
+    {"6\r"    "Queue is empty"}
+    {"1\r"    "Enter data :"}
+    {"123\r"    ""}
+    {"1\r"    "Enter data :"}
+    {"234\r"    ""}
+    {"3\r"    "Front element : 123"}
+    {"4\r"    "Queue not empty"}
+ 
     {"5\r"    ""}
 }
 

@@ -5,9 +5,10 @@ CC=gcc
 
 SOURCES = main.c list.c parser.c pstack.c
 OBJECTS = $(SOURCES:.c=.o)
+TESTLOG = $(SOURCES:.c=.gcno)
 PROGRAM = clic
 LDFLAGS = -ldl -lm -lreadline -lhistory -ltermcap --coverage
-CFLAGS += -Wall
+CFLAGS += -Wall --coverage
 
 all: $(PROGRAM)
 
@@ -16,4 +17,4 @@ $(PROGRAM): $(OBJECTS)
 clean:
 	rm -f $(OBJECTS)
 cleanall:
-	rm -f $(OBJECTS) $(PROGRAM)
+	rm -f $(OBJECTS) $(TESTLOG) $(PROGRAM)

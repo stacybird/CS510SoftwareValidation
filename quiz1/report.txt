@@ -1,15 +1,16 @@
+Stacy Watts
 
 Summary of Project 1
 
-1. Function coverage:
+1. Function coverage: 100%
 
-2. Line coverage:
+2. Line coverage: 83.8%
 
-3. Branch coverage:
+3. Branch coverage: 71.9%
 
-4. Total number of test cases:
+4. Total number of test cases: 72 (in sub groups)
 
-5. Number of passed test cases: all but one.  
+5. Number of passed test cases: all but one.  Turns out a lot of what I tested was happy path this time around.  the segfault was the only glaring part.  
 
 6. Number of failed test cases: only the one.  I'd need to talk to a developer about formatting though.  a lot of the error messages are divergent for formatting. Also inconsistent
 
@@ -18,6 +19,11 @@ Summary of Project 1
 8. What test case triggered the segmentation fault?  titled segfault.  :-) it was trying to remove a non empty stack.
 
 
+
+
 my method for dev:
 run program, add tests, check coverage with this:
 gcov -b -c *.c ; lcov --capture --rc lcov_branch_coverage=1 --directory ./ --output-file coverage.info ; genhtml coverage.info --rc lcov_branch_coverage=1 --output-directory result ; firefox result/index.html 
+
+
+I there out my early 90% 92% 100% html result and exercised purely from test.  That was purely from exercising the software.  :-)  I know how to write these, they just take time, and the tool is less familiar.  I also know how to break software.  Gotta love it!

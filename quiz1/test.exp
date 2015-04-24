@@ -47,7 +47,6 @@ set stacktestdata {
     {"7\r"    "No. of elements in stack : 2"}
     {""       "Enter choice : "}
     {"3\r"    " Top element : 234"}
-    {"2\r"    " Popped value : 234"}
 
     {"5\r"    ""}
 }

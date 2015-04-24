@@ -6,17 +6,99 @@ set tool "clic"
 set srcdir .
 set CLIC "./clic"
 set timeout 1
+
 set prompt "clic2> "
+set unknown "unknown identifier"
+set unknowncmd "unknown command"
+set syntax "syntax error"
+set invalidconst "invalid constant"
+set conflict "name conflict"
+set value "you can not change the value"
+set invalid "invalid variable or function name"
+
 spawn $CLIC;
 
-#expect "Type '\h' to get some help"  { send "\\h\r" }
-
+# fails at rounding up!   {".0000005\r" "0.000001"}
+# TCL seems to hate this as a flag!   {"-\r"        [$syntax]}
+# this is hidden.  without talking to the dev, hard to say what was meant for the menu:
+#    {"\\c\r"      [$prompt]}
 
 set testdata {
-    {""    [$prompt]}
-    {"1+1\r"    "2.000000"}
-    {"1+a\r"    "unknown identifier"}
-    {"\\h\r"    [concat "\\v - variable list\r\n\\f - function list\r\n\\q - quit" $prompt]}
+    {""           [$prompt]}
+    {"\\h\r"      [concat "\\v - variable list\r\n\\f - function list\r\n\\q - quit" $prompt]}
+    {"\\v\r"      [concat "e = 2.718282 (readonly)\r\nPI = 3.141593 (readonly)" $prompt]}
+    {"\\f\r"      [concat "+\r\n-\r\n*\r\n/\r\n^\r\n(\r\n)\r\nneg\r\nnul\r\n" $prompt]}
+    {"\\c\r"      [$prompt]}
+    {"\\y\r"      [$unknowncmd]}
+
+    {")\r"        [$syntax]}
+    {"(\r"        [$syntax]}
+    {"+\r"        [$syntax]}
+    {"*\r"        [$syntax]}
+    {"/\r"        [$syntax]}
+    {"^\r"        [$syntax]}
+    {"neg\r"      [$syntax]}
+    {"nul\r"      [$syntax]}
+    {"sin\r"      [$syntax]}
+    {"cos\r"      [$syntax]}
+    {"tg\r"       [$syntax]}
+    {"arcsin\r"   [$syntax]}
+    {"arctan\r"   [$syntax]}
+    {"arctg\r"    [$syntax]}
+    {"exp\r"      [$syntax]}
+    {"ln\r"       [$syntax]}
+    {"lg\r"       [$syntax]}
+    {"sqrt\r"     [$syntax]}
+    {"cbrt\r"     [$syntax]}
+    {"sh\r"       [$syntax]}
+    {"ch\r"       [$syntax]}
+    {"th\r"       [$syntax]}
+    {"erf\r"      [$syntax]}
+    {"erfc\r"     [$syntax]}
+    {"G\r"        [$syntax]}
+
+    {"foo\r"      [$unknown]}
+    {"foo=1\r"    "1.000000"}
+    {"foo\r"      "1.000000"}
+    {"foo-1*1\r"  "0.000000"}
+    {"foo+1*3\r"  "4.000000"}
+    {"foo-1/3\r"  "0.666667"}
+    {"foo+1/3\r"  "1.333333"}
+    {"\\c\r"      [concat "_const_0 = 1.000000 (readonly)" $prompt]}
+    {"1+foo\r"    "2.000000"}
+    {"bar=2\r"    "2.000000"}
+    {"foo=bar\r"  "2.000000"}
+    {"cos=foo\r"  [$conflict]}
+    {"PI=3\r"     [$value]}
+    {"e=2\r"      [$value]}
+    {"foo2^&*=1\r" [$invalid]}
+
+    {"1+1\r"      "2.000000"}
+    {"1*1\r"      "1.000000"}
+    {"1/1\r"      "1.000000"}
+    {"1-1\r"      "0.000000"}
+    {"1^2\r"      "1.000000"}
+    {"2^2^2^2^2\r" "inf"}
+    {"==\r"       "more than one '='"}
+
+    {"(1+1)\r"    "2.000000"}
+    {".\r"        [$invalidconst]}
+    {"1.\r"       "1.000000"}
+    {"1..\r"      [$invalidconst]}
+    {".1\r"       "0.100000"}
+    {".0000001\r" "0.000000"}
+    {".0000009\r" "0.000001"}
+
+    {"neg(-1)\r"  "1.000000"}
+    {"nul(1)\r"   "1.000000"}
+    {"sin(PI/2)\r" "1.000000"}
+    {"cos(0)\r"   "1.000000"}
+    {"tg(PI)\r"   "0.000000"}
+    {"arcsin(1.1)\r"  "nan"}
+    {"arcsin(1)\r" "1.570796"}
+
+    {"G(6)\r"     "120.000000"}
+
 }
 
 # global CLIC

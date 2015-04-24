@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - coverage.info - clic-2/main.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">clic-2</a> - main.c<span style="font-size: 80%;"> (source / <a href="main.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">61</td>
+            <td class="headerCovTableEntry">68</td>
+            <td class="headerCovTableEntryMed">89.7 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2015-04-24</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="headerItem">Branches:</td>
+            <td class="headerCovTableEntry">32</td>
+            <td class="headerCovTableEntry">36</td>
+            <td class="headerCovTableEntryMed">88.9 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">           Branch data     Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>                :            : </a>
+<span class="lineNum">       2 </span>                :            : #include &lt;stdio.h&gt;
+<span class="lineNum">       3 </span>                :            : #include &lt;stdlib.h&gt;
+<span class="lineNum">       4 </span>                :            : #include &lt;sys/time.h&gt;
+<span class="lineNum">       5 </span>                :            : #include &lt;unistd.h&gt;
+<span class="lineNum">       6 </span>                :            : #include &lt;math.h&gt;
+<span class="lineNum">       7 </span>                :            : #include &lt;readline/readline.h&gt;
+<span class="lineNum">       8 </span>                :            : #include &lt;readline/history.h&gt;
+<span class="lineNum">       9 </span>                :            : #include &quot;parser.h&quot;
+<span class="lineNum">      10 </span>                :            : 
+<span class="lineNum">      11 </span>                :            : #define MAX_USER_VARS 1024
+<span class="lineNum">      12 </span>                :            : #define MAX_ID_LEN 64
+<span class="lineNum">      13 </span>                :            : 
+<span class="lineNum">      14 </span>                :            : struct user_var {
+<span class="lineNum">      15 </span>                :            :         char name[MAX_ID_LEN + 1];
+<span class="lineNum">      16 </span>                :            :         double val;
+<span class="lineNum">      17 </span>                :            : } vars[MAX_USER_VARS];
+<span class="lineNum">      18 </span>                :            : 
+<span class="lineNum">      19 </span>                :            : int slot = 0;
+<span class="lineNum">      20 </span>                :            : 
+<span class="lineNum">      21 </span>                :            : PARSER *p;
+<a name="22"><span class="lineNum">      22 </span>                :            : EXPR *expr;</a>
+<span class="lineNum">      23 </span>                :            : 
+<span class="lineNum">      24 </span>                :<span class="lineCov">         14 : int main(void)</span>
+<span class="lineNum">      25 </span>                :            : {
+<span class="lineNum">      26 </span>                :<span class="lineCov">         14 :         char *es = NULL;</span>
+<span class="lineNum">      27 </span>                :            :         int k;
+<span class="lineNum">      28 </span>                :            : 
+<span class="lineNum">      29 </span>        [<span class="branchCov" title="Branch 0 was taken 14336 times"> + </span><span class="branchCov" title="Branch 1 was taken 14 times"> + </span>]:<span class="lineCov">      14350 :         for (k = 0; k &lt; MAX_USER_VARS; k++) {</span>
+<span class="lineNum">      30 </span>                :<span class="lineCov">      14336 :                 memset(vars[k].name, 0, MAX_ID_LEN + 1);</span>
+<span class="lineNum">      31 </span>                :<span class="lineCov">      14336 :                 vars[k].val = 0;</span>
+<span class="lineNum">      32 </span>                :            :         };
+<span class="lineNum">      33 </span>                :            : 
+<span class="lineNum">      34 </span>                :<span class="lineCov">         14 :         p = parser_create(512, 128, 128, 512);</span>
+<span class="lineNum">      35 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 14 times"> + </span>]:<span class="lineCov">         14 :         if (!p) {</span>
+<span class="lineNum">      36 </span>                :<span class="lineNoCov">          0 :                 printf(&quot;Error creating parser\n&quot;);</span>
+<span class="lineNum">      37 </span>                :<span class="lineNoCov">          0 :                 return 1;</span>
+<span class="lineNum">      38 </span>                :            :         };
+<span class="lineNum">      39 </span>                :            : 
+<span class="lineNum">      40 </span>                :<span class="lineCov">         14 :         using_history();</span>
+<span class="lineNum">      41 </span>                :<span class="lineCov">         14 :         printf(&quot;Type '\\h' to get some help\n&quot;);</span>
+<span class="lineNum">      42 </span>                :            : 
+<span class="lineNum">      43 </span>                :            :         while (1) {
+<span class="lineNum">      44 </span>                :            :                 char *cp1, *cp2;
+<span class="lineNum">      45 </span>                :            :                 double r;
+<span class="lineNum">      46 </span>                :            :                 char *infix;
+<span class="lineNum">      47 </span>                :            : 
+<span class="lineNum">      48 </span>        [<span class="branchCov" title="Branch 0 was taken 179 times"> + </span><span class="branchCov" title="Branch 1 was taken 14 times"> + </span>]:<span class="lineCov">        193 :                 if (es)</span>
+<span class="lineNum">      49 </span>                :<span class="lineCov">        179 :                         free(es);</span>
+<span class="lineNum">      50 </span>                :<span class="lineCov">        193 :                 es = readline(&quot;clic2&gt; &quot;);</span>
+<span class="lineNum">      51 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 193 times"> + </span>]:<span class="lineCov">        193 :                 if (!es)</span>
+<span class="lineNum">      52 </span>                :<span class="lineNoCov">          0 :                         continue;</span>
+<span class="lineNum">      53 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 192 times"> + </span>]:<span class="lineCov">        193 :                 if (!*es)</span>
+<span class="lineNum">      54 </span>                :<span class="lineCov">          1 :                         continue;</span>
+<span class="lineNum">      55 </span>                :<span class="lineCov">        192 :                 add_history(es);</span>
+<span class="lineNum">      56 </span>                :            : 
+<span class="lineNum">      57 </span>                :            :                 /* special command */
+<span class="lineNum">      58 </span>[<span class="branchCov" title="Branch 0 was taken 53 times"> + </span><span class="branchCov" title="Branch 1 was taken 139 times"> + </span>][<span class="branchCov" title="Branch 2 was taken 39 times"> + </span><span class="branchCov" title="Branch 3 was taken 14 times"> + </span>]:<span class="lineCov">        192 :                 if ((strlen(es) == 2) &amp;&amp; (es[0] == '\\')) {</span>
+<span class="lineNum">      59 </span>  [<span class="branchCov" title="Branch 0 was taken 14 times"> + </span><span class="branchCov" title="Branch 1 was taken 6 times"> + </span><span class="branchCov" title="Branch 2 was taken 3 times"> + </span><span class="branchCov" title="Branch 3 was taken 12 times"> + </span> :<span class="lineCov">         39 :                         switch (es[1]) {</span>
+<span class="lineNum">         </span>         <span class="branchCov" title="Branch 4 was taken 2 times"> + </span><span class="branchCov" title="Branch 5 was taken 2 times"> + </span>]
+<span class="lineNum">      60 </span>                :            :                         case 'q':
+<span class="lineNum">      61 </span>                :<span class="lineCov">         14 :                                 goto __end;</span>
+<span class="lineNum">      62 </span>                :            :                         case 'v': 
+<span class="lineNum">      63 </span>                :<span class="lineCov">          6 :                                 parser_print_varlist(p);</span>
+<span class="lineNum">      64 </span>                :<span class="lineCov">          6 :                                 continue;</span>
+<span class="lineNum">      65 </span>                :            :                         case 'f': 
+<span class="lineNum">      66 </span>                :<span class="lineCov">          3 :                                 parser_print_funclist(p);</span>
+<span class="lineNum">      67 </span>                :<span class="lineCov">          3 :                                 continue;</span>
+<span class="lineNum">      68 </span>                :            :                         case 'c': 
+<span class="lineNum">      69 </span>                :<span class="lineCov">         12 :                                 parser_print_constlist(p);</span>
+<span class="lineNum">      70 </span>                :<span class="lineCov">         12 :                                 continue;</span>
+<span class="lineNum">      71 </span>                :            :                         case 'h': 
+<span class="lineNum">      72 </span>                :<span class="lineCov">          2 :                                 printf(&quot;\\v - variable list\n\\f - function list\n\\q - quit\n&quot;);</span>
+<span class="lineNum">      73 </span>                :<span class="lineCov">          2 :                                 continue;</span>
+<span class="lineNum">      74 </span>                :            :                         default:
+<span class="lineNum">      75 </span>                :<span class="lineCov">          2 :                                 printf(&quot;---unknown command\n&quot;);</span>
+<span class="lineNum">      76 </span>                :<span class="lineCov">          2 :                                 continue;</span>
+<span class="lineNum">      77 </span>                :            :                         }
+<span class="lineNum">      78 </span>                :            :                 }
+<span class="lineNum">      79 </span>                :            : 
+<span class="lineNum">      80 </span>                :<span class="lineCov">        153 :                 cp1 = strchr(es, '=');</span>
+<span class="lineNum">      81 </span>                :<span class="lineCov">        153 :                 cp2 = strrchr(es, '=');</span>
+<span class="lineNum">      82 </span>        [<span class="branchCov" title="Branch 0 was taken 3 times"> + </span><span class="branchCov" title="Branch 1 was taken 150 times"> + </span>]:<span class="lineCov">        153 :                 if (cp1 != cp2) {</span>
+<span class="lineNum">      83 </span>                :<span class="lineCov">          3 :                         printf(&quot;---more than one '='\n&quot;);</span>
+<span class="lineNum">      84 </span>                :<span class="lineCov">          3 :                         continue;</span>
+<span class="lineNum">      85 </span>                :            :                 }
+<span class="lineNum">      86 </span>                :            : 
+<span class="lineNum">      87 </span>                :<span class="lineCov">        150 :                 infix = es;</span>
+<span class="lineNum">      88 </span>                :            : 
+<span class="lineNum">      89 </span>                :            :                 /* we have some assignment */
+<span class="lineNum">      90 </span>        [<span class="branchCov" title="Branch 0 was taken 34 times"> + </span><span class="branchCov" title="Branch 1 was taken 116 times"> + </span>]:<span class="lineCov">        150 :                 if (cp1) {</span>
+<span class="lineNum">      91 </span>                :<span class="lineCov">         34 :                         cp1[0] = 0;</span>
+<span class="lineNum">      92 </span>                :<span class="lineCov">         34 :                         cp1++;</span>
+<span class="lineNum">      93 </span>                :            : 
+<span class="lineNum">      94 </span>                :            :                         /**
+<span class="lineNum">      95 </span>                :            :                          *  TODO: add macro support
+<span class="lineNum">      96 </span>                :            :                          **/
+<span class="lineNum">      97 </span>                :            : 
+<span class="lineNum">      98 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 34 times"> + </span>]:<span class="lineCov">         34 :                         if (slot == MAX_USER_VARS) {</span>
+<span class="lineNum">      99 </span>                :<span class="lineNoCov">          0 :                                 printf(&quot;---no more space left for variables\n&quot;);</span>
+<span class="lineNum">     100 </span>                :<span class="lineNoCov">          0 :                                 continue;</span>
+<span class="lineNum">     101 </span>                :            :                         }
+<span class="lineNum">     102 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 34 times"> + </span>]:<span class="lineCov">         34 :                         if (strlen(es) &gt; MAX_ID_LEN) {</span>
+<span class="lineNum">     103 </span>                :<span class="lineNoCov">          0 :                                 printf(&quot;---identifier is too long\n&quot;);</span>
+<span class="lineNum">     104 </span>                :<span class="lineNoCov">          0 :                                 continue;</span>
+<span class="lineNum">     105 </span>                :            :                         }
+<span class="lineNum">     106 </span>                :<span class="lineCov">         34 :                         memset(vars[slot].name, 0, MAX_ID_LEN + 1);</span>
+<span class="lineNum">     107 </span>                :<span class="lineCov">         34 :                         strcpy(vars[slot].name, es);</span>
+<span class="lineNum">     108 </span>                :<span class="lineCov">         34 :                         infix = cp1;</span>
+<span class="lineNum">     109 </span>                :            :                 }
+<span class="lineNum">     110 </span>                :            : 
+<span class="lineNum">     111 </span>                :            :                 /* calculate the expression */
+<span class="lineNum">     112 </span>                :<span class="lineCov">        150 :                 expr = parser_create_expr(p, infix);</span>
+<span class="lineNum">     113 </span>        [<span class="branchCov" title="Branch 0 was taken 41 times"> + </span><span class="branchCov" title="Branch 1 was taken 109 times"> + </span>]:<span class="lineCov">        150 :                 if (!expr) {</span>
+<span class="lineNum">     114 </span>                :<span class="lineCov">         41 :                         printf(&quot;---%s\n&quot;, parser_errorstr(p-&gt;error));</span>
+<span class="lineNum">     115 </span>                :<span class="lineCov">         41 :                         continue;</span>
+<span class="lineNum">     116 </span>                :            :                 };
+<span class="lineNum">     117 </span>                :            : 
+<span class="lineNum">     118 </span>                :            :                 /** 
+<span class="lineNum">     119 </span>                :            :                  * uncomment the line below to see expressions in postfix notation
+<span class="lineNum">     120 </span>                :            :                  */
+<span class="lineNum">     121 </span>                :            :                 // parser_print_expr_postfix(p, expr);
+<span class="lineNum">     122 </span>                :            : 
+<span class="lineNum">     123 </span>                :<span class="lineCov">        109 :                 r = parser_eval_expr(p, expr);</span>
+<span class="lineNum">     124 </span>                :            : 
+<span class="lineNum">     125 </span>        [<span class="branchCov" title="Branch 0 was taken 32 times"> + </span><span class="branchCov" title="Branch 1 was taken 77 times"> + </span>]:<span class="lineCov">        109 :                 if (cp1) {</span>
+<span class="lineNum">     126 </span>                :            :                         VAR *v;
+<span class="lineNum">     127 </span>                :<span class="lineCov">         32 :                         int exists = 0;</span>
+<span class="lineNum">     128 </span>                :<span class="lineCov">         32 :                         v = parser_create_var(p, vars[slot].name, &amp;vars[slot].val, &amp;exists);</span>
+<span class="lineNum">     129 </span>        [<span class="branchCov" title="Branch 0 was taken 10 times"> + </span><span class="branchCov" title="Branch 1 was taken 22 times"> + </span>]:<span class="lineCov">         32 :                         if (!v) {</span>
+<span class="lineNum">     130 </span>                :<span class="lineCov">         10 :                                 printf(&quot;---%s\n&quot;, parser_errorstr(p-&gt;error));</span>
+<span class="lineNum">     131 </span>                :<span class="lineCov">         10 :                                 continue;</span>
+<span class="lineNum">     132 </span>                :            :                         }
+<span class="lineNum">     133 </span>                :<span class="lineCov">         22 :                         *(double*)v-&gt;loc = r;</span>
+<span class="lineNum">     134 </span>        [<span class="branchCov" title="Branch 0 was taken 8 times"> + </span><span class="branchCov" title="Branch 1 was taken 14 times"> + </span>]:<span class="lineCov">         22 :                         if (!exists) /* new var */</span>
+<span class="lineNum">     135 </span>                :<span class="lineCov">         22 :                                 slot++;</span>
+<span class="lineNum">     136 </span>                :            :                 };
+<span class="lineNum">     137 </span>                :            : 
+<span class="lineNum">     138 </span>                :<span class="lineCov">         99 :                 printf(&quot;%.6f\n&quot;, r);</span>
+<span class="lineNum">     139 </span>                :<span class="lineCov">        179 :         };</span>
+<span class="lineNum">     140 </span>                :            : 
+<span class="lineNum">     141 </span>                :            :       __end:
+<span class="lineNum">     142 </span>                :<span class="lineCov">         14 :         parser_delete(p);</span>
+<span class="lineNum">     143 </span>                :<span class="lineCov">         14 :         return 0;</span>
+<span class="lineNum">     144 </span>                :            : }
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

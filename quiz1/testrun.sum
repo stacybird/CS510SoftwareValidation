@@ -1,4 +1,4 @@
-Test Run By swatts on Fri Apr 24 12:51:40 2015
+Test Run By swatts on Fri Apr 24 13:07:30 2015
 Native configuration is x86_64-unknown-linux-gnu
 
 		===  tests ===
@@ -34,6 +34,7 @@ PASS:
 PASS: 
 PASS: 2
 PASS: 7
+PASS: 2
 PASS: 4
 PASS: a
 PASS: 3
@@ -44,6 +45,9 @@ PASS: 1
 PASS: 234
 PASS: 3
 PASS: 4
+PASS: 6
+PASS: 7
+PASS: 2
 PASS: 5
 PASS: 
 PASS: 
@@ -70,10 +74,14 @@ PASS: 567
 PASS: 9
 PASS: 123
 PASS: 567
+PASS: 3
+PASS: 1
+PASS: 444
+PASS: 5
 PASS: 123
 PASS: 10
 
 		=== data_structure Summary ===
 
-# of expected passes		63
+# of expected passes		71
 # of unexpected failures	1

@@ -47,6 +47,7 @@ set stacktestdata {
     {"7\r"    "No. of elements in stack : 2"}
     {""       "Enter choice : "}
     {"3\r"    " Top element : 234"}
+    {"2\r"    " Popped value : 234"}
 
     {"5\r"    ""}
 }
@@ -90,6 +91,20 @@ set listtestdata {
     {"9\r"    "Enter node data to be updated :"}
     {"1\r"    "Enter new data :"}
     {"12\r"    "Error : List empty no node to update"}
+    {"1\r"    "Enter value to node :"}
+    {"123\r"    ""}
+    {"2\r"    "Enter value to node :"}
+    {"234\r"    ""}
+    {"5\r"    " Linked list elements from begining :  123  234"}
+    {"6\r"    "Reverse order of linked list is :  234  123"}
+    {"8\r"    "Linked list elements from begining :  123  234"}
+    {"9\r"    "Enter node data to be updated :"}
+    {"1\r"    "Enter new data :"}
+    {"567\r"    " Error : 1 not found in list to update"}
+    {"9\r"    "Enter node data to be updated :"}
+    {"123\r"    "Enter new data :"}
+    {"567\r"    " Linked list elements from begining :  567  234"}
+    {"123\r"    "Wrong choice menu"}
     {"10\r"    ""}
 }
 

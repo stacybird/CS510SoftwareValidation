@@ -1,0 +1,3 @@
+set tool clic
+set srcdir .
+set objdir /home/swatts/dejagnu.test

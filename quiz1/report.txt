@@ -9,10 +9,10 @@ Summary of Project 1
 
 4. Total number of test cases:
 
-5. Number of passed test cases:
+5. Number of passed test cases: all but one.  
 
-6. Number of failed test cases:
+6. Number of failed test cases: only the one.  I'd need to talk to a developer about formatting though.  a lot of the error messages are divergent for formatting. Also inconsistent
 
-7. Did you trigger the segmentation fault?
+7. Did you trigger the segmentation fault?  Yes.  I create a test flow just for the seg fault as simple as I could make it.
 
-8. What test case triggered the segmentation fault?
+8. What test case triggered the segmentation fault?  titled segfault.  :-) it was trying to remove a non empty stack.

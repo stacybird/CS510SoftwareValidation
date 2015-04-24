@@ -1,0 +1,1661 @@
+        -:    0:Source:parser.c
+        -:    0:Programs:4
+        -:    1:
+        -:    2:#include <stdio.h>
+        -:    3:#include <stdlib.h>
+        -:    4:#include <string.h>
+        -:    5:#include <math.h>
+        -:    6:#include <ctype.h>
+        -:    7:#include <dlfcn.h>
+        -:    8:#include "list.h"
+        -:    9:#include "pstack.h"
+        -:   10:#include "parser.h"
+        -:   11:
+        -:   12:#define LIBMNSYM 17
+        -:   13:#define MAXCSTRLEN 8
+        -:   14:
+        -:   15:static char cprefix[] = "_const_";
+        -:   16:
+        -:   17:char *parser_error_msgs[ERRN] = {
+        -:   18:	"everything in the garden's lovely",
+        -:   19:	"oops...bug in parser",
+        -:   20:	"invalid parser",
+        -:   21:	"no memory",
+        -:   22:	"invalid variable or function name",
+        -:   23:	"invalid constant",
+        -:   24:	"constant storage is full",
+        -:   25:	"name conflict",
+        -:   26:	"unknown identifier",
+        -:   27:	"syntax error",
+        -:   28:	"stack overflow",
+        -:   29:	"why so many constants? :-)",
+        -:   30:	"expression too complicated",
+        -:   31:	"you can not change the value"
+        -:   32:};
+        -:   33:
+        -:   34:char *libmsyms[LIBMNSYM] = {
+        -:   35:	"sin",
+        -:   36:	"cos",
+        -:   37:	"tan",
+        -:   38:	"asin",
+        -:   39:	"acos",
+        -:   40:	"atan",
+        -:   41:	"exp",
+        -:   42:	"log",
+        -:   43:	"log10",
+        -:   44:	"sqrt",
+        -:   45:	"cbrt",
+        -:   46:	"sinh",
+        -:   47:	"cosh",
+        -:   48:	"tanh",
+        -:   49:	"erf",
+        -:   50:	"erfc",
+        -:   51:	"tgamma"
+        -:   52:};
+        -:   53:
+        -:   54:char *mfname[LIBMNSYM] = {
+        -:   55:	"sin",
+        -:   56:	"cos",
+        -:   57:	"tg",
+        -:   58:	"arcsin",
+        -:   59:	"arccos",
+        -:   60:	"arctg",
+        -:   61:	"exp",
+        -:   62:	"ln",
+        -:   63:	"lg",
+        -:   64:	"sqrt",
+        -:   65:	"cbrt",
+        -:   66:	"sh",
+        -:   67:	"ch",
+        -:   68:	"th",
+        -:   69:	"erf",
+        -:   70:	"erfc",
+        -:   71:	"G"
+        -:   72:};
+        -:   73:
+        -:   74:static double e;
+        -:   75:static double PI;
+        -:   76:
+        -:   77:/* helping functions */
+        -:   78:
+        -:   79:int check_item_name(void *v1, void *v2);
+        -:   80:int check_item_val(void *v1, void *v2);
+        -:   81:int check_item_addr(void *v1, void *v2);
+        -:   82:
+        -:   83:EXPR_ITEM *find_item_by_name(LIST *list, char *vn);
+        -:   84:EXPR_ITEM *find_item_by_val(LIST *list, double vv);
+        -:   85:EXPR_ITEM *find_item_by_addr(LIST *list, double *loc);
+        -:   86:
+        -:   87:PARSER_ERROR valid_expr(PARSER*, EXPR*);
+        -:   88:
+        -:   89:void delete_expr_item(void *dp);
+        -:   90:void delete_expr(void *ex);
+        -:   91:
+function check_item_name called 8437 returned 100% blocks executed 100%
+     8437:   92:int check_item_name(void *v1, void *v2)
+        -:   93:{
+     8437:   94:	EXPR_ITEM *var1 = (EXPR_ITEM*)v1;
+     8437:   95:	EXPR_ITEM *var2 = (EXPR_ITEM*)v2;
+        -:   96:	
+     8437:   97:	int cr = strcmp(var1->name, var2->name);
+        -:   98:	
+     8437:   99:	return (cr == 0)?(1):(0);
+        -:  100:}
+        -:  101:
+function check_item_val called 281 returned 100% blocks executed 100%
+      281:  102:int check_item_val(void *v1, void *v2)
+        -:  103:{
+      281:  104:	EXPR_ITEM *var1 = (EXPR_ITEM*)v1;
+      281:  105:	EXPR_ITEM *var2 = (EXPR_ITEM*)v2;
+      281:  106:	return (*(double*)var1->loc == *(double*)var2->loc);
+        -:  107:}
+        -:  108:
+function check_item_addr called 0 returned 0% blocks executed 0%
+    #####:  109:int check_item_addr(void *v1, void *v2)
+        -:  110:{
+    #####:  111:	EXPR_ITEM *var1 = (EXPR_ITEM*)v1;
+    #####:  112:	EXPR_ITEM *var2 = (EXPR_ITEM*)v2;
+    #####:  113:	return (var1->loc == var2->loc);
+        -:  114:}
+        -:  115:
+function find_item_by_name called 1091 returned 100% blocks executed 100%
+     1091:  116:EXPR_ITEM *find_item_by_name(LIST *list, char *vn)
+        -:  117:{
+        -:  118:	EXPR_ITEM sei;
+     1091:  119:	sei.name = vn;
+        -:  120:	
+     1091:  121:	return (EXPR_ITEM*)list_find_first(list, (void*)&sei, check_item_name);
+call    0 returned 1091
+        -:  122:}
+        -:  123:
+function find_item_by_val called 111 returned 100% blocks executed 100%
+      111:  124:EXPR_ITEM *find_item_by_val(LIST *list, double vv)
+        -:  125:{
+        -:  126:	EXPR_ITEM sei;
+      111:  127:	double v = vv;
+      111:  128:	sei.loc = &v;
+        -:  129:	
+      111:  130:	return (EXPR_ITEM*)list_find_first(list, (void*)&sei, check_item_val);
+call    0 returned 111
+        -:  131:}
+        -:  132:
+function find_item_by_addr called 0 returned 0% blocks executed 0%
+    #####:  133:EXPR_ITEM *find_item_by_addr(LIST *list, double *loc)
+        -:  134:{
+        -:  135:	EXPR_ITEM sei;
+    #####:  136:	sei.loc = loc;
+        -:  137:	
+    #####:  138:	return (EXPR_ITEM*)list_find_first(list, (void*)&sei, check_item_addr);
+call    0 never executed
+        -:  139:}
+        -:  140:
+function const_exists_by_val called 0 returned 0% blocks executed 0%
+    #####:  141:int const_exists_by_val(PARSER *p, double c)
+        -:  142:{
+        -:  143:	int k, match;
+    #####:  144:	for (k = 0; k <= p->last_const; k++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  145:		match = (p->const_arr[k] == c);
+    #####:  146:		if (match)
+branch  0 never executed
+branch  1 never executed
+    #####:  147:			break;
+        -:  148:	};
+    #####:  149:	return match;
+        -:  150:}
+        -:  151:
+function delete_expr_item called 475 returned 100% blocks executed 100%
+      475:  152:void delete_expr_item(void*dp)
+        -:  153:{
+      475:  154:	EXPR_ITEM *ei = (EXPR_ITEM*)dp;
+      475:  155:	if (ei->type == constant) {
+branch  0 taken 46 (fallthrough)
+branch  1 taken 429
+       46:  156:		free(ei->name);
+        -:  157:	};
+      475:  158:	free(ei);
+      475:  159:}
+        -:  160:
+        -:  161:/* end of helping functions */
+        -:  162:
+        -:  163:
+        -:  164:/*
+        -:  165:	+, -, *, /, ^
+        -:  166:*/
+        -:  167:
+function p_add called 9 returned 100% blocks executed 100%
+        9:  168:double p_add(double *a)
+        -:  169:{
+        9:  170:	return a[0]+a[1];
+        -:  171:}
+        -:  172:
+function p_sub called 6 returned 100% blocks executed 100%
+        6:  173:double p_sub(double *a)
+        -:  174:{
+        6:  175:	return a[0]-a[1];
+        -:  176:}
+        -:  177:
+function p_mul called 4 returned 100% blocks executed 100%
+        4:  178:double p_mul(double *a)
+        -:  179:{
+        4:  180:	return a[0]*a[1];
+        -:  181:}
+        -:  182:
+function p_div called 9 returned 100% blocks executed 100%
+        9:  183:double p_div(double *a)
+        -:  184:{
+        9:  185:	return a[0]/a[1];
+        -:  186:}
+        -:  187:
+function p_pow called 10 returned 100% blocks executed 100%
+       10:  188:double p_pow(double *a)
+        -:  189:{
+       10:  190:	return pow(a[0],a[1]);
+        -:  191:}
+        -:  192:
+function p_neg called 7 returned 100% blocks executed 100%
+        7:  193:double p_neg(double *a)
+        -:  194:{
+        7:  195:	return -a[0];
+        -:  196:}
+        -:  197:
+function p_nul called 5 returned 100% blocks executed 100%
+        5:  198:double p_nul(double *a)
+        -:  199:{
+        5:  200:	return a[0];
+        -:  201:}
+        -:  202:
+function parser_error called 0 returned 0% blocks executed 0%
+    #####:  203:PARSER_ERROR parser_error(PARSER *p)
+        -:  204:{
+    #####:  205:	if (!p)
+branch  0 never executed
+branch  1 never executed
+    #####:  206:		return pe_noparser;
+    #####:  207:	return p->error;
+        -:  208:}
+        -:  209:
+function parser_errorstr called 51 returned 100% blocks executed 75%
+       51:  210:char *parser_errorstr(PARSER_ERROR ercode)
+        -:  211:{
+       51:  212:	if (ercode == pe_ok)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 51
+    #####:  213:		return NULL;
+       51:  214:	return parser_error_msgs[ercode];
+        -:  215:}
+        -:  216:
+function parser_create called 15 returned 100% blocks executed 58%
+       15:  217:PARSER *parser_create(int stack_size, int maxconst, int maxfargs, int maxires)
+        -:  218:{
+        -:  219:	PARSER *parser;
+        -:  220:	int k;
+        -:  221:	void* prog;
+        -:  222:	double (*libmsym)(double*);
+        -:  223:	char *dlerr;
+        -:  224:	char test[MAXCSTRLEN];
+        -:  225:	int iii;
+        -:  226:	
+       15:  227:	parser = (PARSER*)malloc(sizeof(PARSER));
+       15:  228:	if ( !parser ) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  229:		return NULL;
+        -:  230:	};
+        -:  231:
+       15:  232:	parser->error      = pe_ok;
+       15:  233:	parser->var_list   = NULL;
+       15:  234:	parser->fun_list   = NULL;
+       15:  235:	parser->expr_list  = NULL;
+       15:  236:	parser->const_list = NULL;
+       15:  237:	parser->const_arr  = NULL;
+       15:  238:	parser->last_const = 0;
+       15:  239:	parser->maxconst   = maxconst;
+       15:  240:	parser->fargs      = NULL;
+       15:  241:	parser->maxfargs   = maxfargs;
+       15:  242:	parser->imres      = NULL;
+       15:  243:	parser->maxires    = maxires;
+       15:  244:	parser->stack      = NULL;
+        -:  245:	
+       15:  246:	if (snprintf(test, MAXCSTRLEN, "%d", maxconst) == -1) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  247:		parser->error = pe_toomanyconst;
+    #####:  248:		goto clean_up;
+        -:  249:	};
+       15:  250:	parser->const_nmlen = strlen(test)+strlen(cprefix);
+        -:  251:	
+       15:  252:	parser->var_list = list_create();
+call    0 returned 15
+       15:  253:	if (!parser->var_list) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  254:		parser->error = pe_nomemory;
+    #####:  255:		goto clean_up;
+        -:  256:	};
+        -:  257:
+       15:  258:	parser->fun_list = list_create();
+call    0 returned 15
+       15:  259:	if (!parser->fun_list) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  260:		parser->error = pe_nomemory;
+    #####:  261:		goto clean_up;
+        -:  262:	};
+        -:  263:
+       15:  264:	parser->const_list = list_create();
+call    0 returned 15
+       15:  265:	if (!parser->const_list) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  266:		parser->error = pe_nomemory;
+    #####:  267:		goto clean_up;
+        -:  268:	};
+        -:  269:
+       15:  270:	parser->const_arr = (double*)malloc(maxconst*sizeof(double));
+       15:  271:	if (!parser->const_arr) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  272:		parser->error = pe_nomemory;
+    #####:  273:		goto clean_up;
+        -:  274:	};
+        -:  275:	
+       15:  276:	parser->imres = (double*)malloc(maxires*sizeof(double));
+       15:  277:	if (!parser->imres) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  278:		parser->error = pe_nomemory;
+    #####:  279:		goto clean_up;
+        -:  280:	};
+        -:  281:	
+       15:  282:	parser->fargs = (double*)malloc(maxfargs*sizeof(double));
+       15:  283:	if (!parser->fargs ){
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  284:		parser->error = pe_nomemory;
+    #####:  285:		goto clean_up;
+        -:  286:	};
+        -:  287:
+        -:  288:	
+     1935:  289:	for (k = 0; k < maxconst; k++) {
+branch  0 taken 1920
+branch  1 taken 15 (fallthrough)
+     1920:  290:		parser->const_arr[k] = 1;
+        -:  291:	};
+        -:  292:	
+       15:  293:	parser->expr_list = list_create();
+call    0 returned 15
+       15:  294:	if (!parser->expr_list) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  295:		parser->error = pe_nomemory;
+    #####:  296:		goto clean_up;
+        -:  297:	}
+        -:  298:
+       15:  299:	parser->stack = pstack_create(stack_size);
+call    0 returned 15
+       15:  300:	if (!parser->stack) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  301:		parser->error = pe_nomemory;
+    #####:  302:		goto clean_up;
+        -:  303:	}
+        -:  304:
+       15:  305:	iii = 1;
+        -:  306:	/* adding some built-in variables */
+       15:  307:	if (!parser_create_var(parser, "e", &e, &iii)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  308:		parser->error = pe_nomemory;
+    #####:  309:		goto clean_up;
+        -:  310:	};
+       15:  311:	e = exp(1);
+        -:  312:
+       15:  313:	iii = 1;
+       15:  314:	if (!parser_create_var(parser, "PI", &PI, &iii) ) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  315:		parser->error = pe_nomemory;
+    #####:  316:		goto clean_up;
+        -:  317:	};
+       15:  318:	PI = acos(-1);
+        -:  319:
+        -:  320:	/* adding functions */	
+       15:  321:	if (!parser_create_func_nocheck(parser, "+", 2, p_add)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  322:		parser->error = pe_nomemory;
+    #####:  323:		goto clean_up;
+        -:  324:	};
+        -:  325:
+       15:  326:	if (!parser_create_func_nocheck(parser, "-", 2, p_sub)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  327:		parser->error = pe_nomemory;
+    #####:  328:		goto clean_up;
+        -:  329:	};
+        -:  330:
+       15:  331:	if (!parser_create_func_nocheck(parser, "*", 2, p_mul)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  332:		parser->error = pe_nomemory;
+    #####:  333:		goto clean_up;
+        -:  334:	};
+        -:  335:
+       15:  336:	if (!parser_create_func_nocheck(parser, "/", 2, p_div)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  337:		parser->error = pe_nomemory;
+    #####:  338:		goto clean_up;
+        -:  339:	};
+        -:  340:
+       15:  341:	if (!parser_create_func_nocheck(parser, "^", 2, p_pow)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  342:		parser->error = pe_nomemory;
+    #####:  343:		goto clean_up;
+        -:  344:	};
+        -:  345:
+       15:  346:	if (!parser_create_func_nocheck(parser, "(", 0, NULL)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  347:		parser->error = pe_nomemory;
+    #####:  348:		goto clean_up;
+        -:  349:	};
+        -:  350:
+       15:  351:	if (!parser_create_func_nocheck(parser, ")", 0, NULL)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  352:		parser->error = pe_nomemory;
+    #####:  353:		goto clean_up;
+        -:  354:	};
+        -:  355:
+       15:  356:	if (!parser_create_func_nocheck(parser, "neg", 1, p_neg)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  357:		parser->error = pe_nomemory;
+    #####:  358:		goto clean_up;
+        -:  359:	};
+        -:  360:
+       15:  361:	if (!parser_create_func_nocheck(parser, "nul", 1, p_nul)) {
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  362:		parser->error = pe_nomemory;
+    #####:  363:		goto clean_up;
+        -:  364:	};
+        -:  365:
+        -:  366:	/* adding functions from libm */
+       15:  367:	prog = dlopen(NULL, RTLD_LAZY);
+call    0 returned 15
+       15:  368:	if (!prog)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  369:		return parser;
+        -:  370:	
+      270:  371:	for (k = 0; k < LIBMNSYM; k++) {
+branch  0 taken 255
+branch  1 taken 15 (fallthrough)
+      255:  372:		libmsym = dlsym(prog, libmsyms[k]);
+call    0 returned 255
+      255:  373:		if ((dlerr = dlerror()) == NULL) {
+call    0 returned 255
+branch  1 taken 255 (fallthrough)
+branch  2 taken 0
+      255:  374:			parser_create_func_nocheck(parser, mfname[k], -1, libmsym);
+call    0 returned 255
+        -:  375:		};
+        -:  376:	};
+        -:  377:
+       15:  378:	dlclose(prog);
+call    0 returned 15
+       15:  379:	return parser;
+        -:  380:	
+        -:  381:clean_up:
+        -:  382:
+    #####:  383:	if (parser->stack)
+branch  0 never executed
+branch  1 never executed
+    #####:  384:		pstack_delete(parser->stack);
+call    0 never executed
+    #####:  385:	if (parser->imres)
+branch  0 never executed
+branch  1 never executed
+    #####:  386:		free(parser->imres);
+    #####:  387:	if (parser->fargs)
+branch  0 never executed
+branch  1 never executed
+    #####:  388:		free(parser->fargs);
+    #####:  389:	if (parser->const_arr)
+branch  0 never executed
+branch  1 never executed
+    #####:  390:		free(parser->const_arr);
+        -:  391:	
+        -:  392:	/* all list except function list are empty */
+    #####:  393:	if (parser->expr_list)
+branch  0 never executed
+branch  1 never executed
+    #####:  394:		list_delete(parser->expr_list, NULL);
+call    0 never executed
+    #####:  395:	if (parser->var_list)
+branch  0 never executed
+branch  1 never executed
+    #####:  396:		list_delete(parser->var_list, NULL);
+call    0 never executed
+    #####:  397:	if (parser->const_list)
+branch  0 never executed
+branch  1 never executed
+    #####:  398:		list_delete(parser->const_list, NULL);
+call    0 never executed
+        -:  399:	
+    #####:  400:	if (parser->fun_list)
+branch  0 never executed
+branch  1 never executed
+    #####:  401:		list_delete(parser->fun_list, delete_expr_item);
+call    0 never executed
+        -:  402:	
+    #####:  403:	free(parser);
+    #####:  404:	return NULL;	
+        -:  405:}
+        -:  406:
+function parser_create_var called 63 returned 100% blocks executed 84%
+       63:  407:VAR* parser_create_var(PARSER*parser, char *varname, double *var, int *exists)
+        -:  408:{
+        -:  409:	VAR *newvar;
+        -:  410:	VAR *oldvar;
+        -:  411:	int k;
+       63:  412:	int readonly = *exists; /* save the value*/
+        -:  413:	
+       63:  414:	if (!parser)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 63
+    #####:  415:		return NULL;
+       63:  416:	*exists = 0;
+        -:  417:
+       63:  418:	parser->error = pe_ok; 
+        -:  419:
+       63:  420:	if (!(isascii(varname[0]) && isalpha(varname[0]))) {
+branch  0 taken 63 (fallthrough)
+branch  1 taken 0
+call    2 returned 63
+branch  3 taken 0 (fallthrough)
+branch  4 taken 63
+    #####:  421:		parser->error = pe_invalidname;
+    #####:  422:		return NULL;
+        -:  423:	};
+        -:  424:	
+      136:  425:	for (k = 1; k < strlen(varname); k++) {
+branch  0 taken 74
+branch  1 taken 62 (fallthrough)
+       74:  426:		if (!((isascii(varname[k]) && isalnum(varname[k])) || varname[k]=='_')) {
+branch  0 taken 74 (fallthrough)
+branch  1 taken 0
+call    2 returned 74
+branch  3 taken 1 (fallthrough)
+branch  4 taken 73
+branch  5 taken 1 (fallthrough)
+branch  6 taken 0
+        1:  427:			parser->error = pe_invalidname;
+        1:  428:			return NULL;
+        -:  429:		};
+        -:  430:	};
+        -:  431:
+        -:  432:	/* already exists? */
+       62:  433:	oldvar = (VAR*)find_item_by_name(parser->var_list, (void*)varname);
+call    0 returned 62
+       62:  434:	if (oldvar) {
+branch  0 taken 21 (fallthrough)
+branch  1 taken 41
+       21:  435:		*exists = 1;
+       21:  436:		if (oldvar->readonly) {
+branch  0 taken 7 (fallthrough)
+branch  1 taken 14
+        7:  437:			parser->error = pe_readonly;
+        7:  438:			return NULL;
+        -:  439:		}
+       14:  440:		return oldvar;
+        -:  441:	}
+        -:  442:
+        -:  443:/*
+        -:  444:	oldvar = (VAR*)find_item_by_addr(parser->var_list, var);
+        -:  445:	if (oldvar) {
+        -:  446:	};
+        -:  447:*/
+        -:  448:
+        -:  449:	/* also look it up in constant and function lists */
+       41:  450:	oldvar = (VAR*)find_item_by_name(parser->const_list, (void*)varname);
+call    0 returned 41
+       41:  451:	if (oldvar) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 41
+    #####:  452:		*exists = 1;
+    #####:  453:		parser->error = pe_nameconflict;
+    #####:  454:		return NULL;
+        -:  455:	};
+        -:  456:/*
+        -:  457:	oldvar = (VAR*)find_item_by_addr(parser->const_list, var);
+        -:  458:	if (oldvar) {
+        -:  459:	}
+        -:  460:*/
+       41:  461:	oldvar = (VAR*)find_item_by_name(parser->fun_list, (void*)varname);
+call    0 returned 41
+       41:  462:	if (oldvar) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 39
+        2:  463:		*exists = 1;
+        2:  464:		parser->error = pe_nameconflict;
+        2:  465:		return NULL;
+        -:  466:	};
+        -:  467:/*
+        -:  468:	oldvar = (VAR*)find_item_by_addr(parser->const_list, var);
+        -:  469:	if ( oldvar ) {
+        -:  470:	}
+        -:  471:*/	
+       39:  472:	newvar = (VAR*)malloc(sizeof(VAR));
+       39:  473:	if (!newvar) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 39
+    #####:  474:		parser->error = pe_nomemory;
+    #####:  475:		return NULL;
+        -:  476:	};
+        -:  477:	
+       39:  478:	newvar->name = varname;
+       39:  479:	newvar->type = variable;
+       39:  480:	newvar->loc  = var;
+       39:  481:	newvar->argnum = 0;
+       39:  482:	newvar->readonly = readonly;
+        -:  483:	
+       39:  484:	if (!list_add(parser->var_list, (void*)newvar)) {
+call    0 returned 39
+branch  1 taken 0 (fallthrough)
+branch  2 taken 39
+    #####:  485:		free(newvar);
+    #####:  486:		parser->error = pe_nomemory;
+    #####:  487:		return NULL;
+        -:  488:	}
+        -:  489:
+       39:  490:	return newvar;
+        -:  491:}
+        -:  492:
+        -:  493:
+        -:  494:/* for internal use only! */
+function parser_addconst called 46 returned 100% blocks executed 71%
+       46:  495:VAR* parser_addconst(PARSER*parser, char *cname, double *c)
+        -:  496:{
+        -:  497:	VAR * newvar;
+        -:  498:
+       46:  499:	newvar = (VAR*)malloc(sizeof(VAR));
+       46:  500:	if (!newvar) return NULL;
+branch  0 taken 0 (fallthrough)
+branch  1 taken 46
+        -:  501:
+       46:  502:	newvar->name = cname;
+       46:  503:	newvar->type = constant;
+       46:  504:	newvar->loc  = c;
+       46:  505:	newvar->argnum = 0;
+       46:  506:	newvar->readonly = 1;
+        -:  507:
+       46:  508:	if (!list_add(parser->const_list, (void*)newvar)) {
+call    0 returned 46
+branch  1 taken 0 (fallthrough)
+branch  2 taken 46
+    #####:  509:		free(newvar);
+    #####:  510:		return NULL;
+        -:  511:	}
+        -:  512:
+       46:  513:	return newvar;
+        -:  514:}
+        -:  515:
+function print_item called 143 returned 100% blocks executed 100%
+      143:  516:int print_item(void*v)
+        -:  517:{
+      143:  518:	VAR * var = (VAR*)v;
+      143:  519:	printf("%s", var->name);
+call    0 returned 143
+      143:  520:	if (var->type != function ) {
+branch  0 taken 39 (fallthrough)
+branch  1 taken 104
+       39:  521:		printf(" = %f", *(double*)var->loc);
+call    0 returned 39
+       39:  522:		if (var->readonly) {
+branch  0 taken 34 (fallthrough)
+branch  1 taken 5
+       34:  523:			printf(" (readonly)\n");
+call    0 returned 34
+        -:  524:		} else {
+        5:  525:			printf("\n");
+call    0 returned 5
+        -:  526:		}
+        -:  527:	} else {
+      104:  528:		printf("\n");
+call    0 returned 104
+        -:  529:	};
+      143:  530:	return 0;
+        -:  531:}
+        -:  532:
+function parser_print_varlist called 8 returned 100% blocks executed 100%
+        8:  533:void parser_print_varlist(PARSER*parser)
+        -:  534:{
+        8:  535:	list_foreach(parser->var_list, print_item);
+call    0 returned 8
+        8:  536:}
+        -:  537:
+function parser_print_funclist called 4 returned 100% blocks executed 100%
+        4:  538:void parser_print_funclist(PARSER*parser)
+        -:  539:{
+        4:  540:	list_foreach(parser->fun_list, print_item);
+call    0 returned 4
+        4:  541:}
+        -:  542:
+function parser_print_constlist called 13 returned 100% blocks executed 100%
+       13:  543:void parser_print_constlist(PARSER*parser)
+        -:  544:{
+       13:  545:	list_foreach(parser->const_list, print_item);
+call    0 returned 13
+       13:  546:}
+        -:  547:
+function print_expr_item called 0 returned 0% blocks executed 0%
+    #####:  548:int print_expr_item(void*v)
+        -:  549:{
+    #####:  550:	EXPR_ITEM * ei = (EXPR_ITEM*)v;
+    #####:  551:	if (ei->type != constant) {
+branch  0 never executed
+branch  1 never executed
+    #####:  552:		printf("%s ", ei->name);
+call    0 never executed
+        -:  553:	} else {
+    #####:  554:		printf("%f ", *(double*)ei->loc);
+call    0 never executed
+        -:  555:	};
+    #####:  556:	return 0;
+        -:  557:}
+        -:  558:
+function parser_print_expr_infix called 0 returned 0% blocks executed 0%
+    #####:  559:void parser_print_expr_infix(PARSER*parser, EXPR *ex)
+        -:  560:{
+        -:  561:	
+    #####:  562:	if (!list_find_by_addr(parser->expr_list, ex)) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  563:		return;
+        -:  564:	};
+        -:  565:	
+    #####:  566:	list_foreach(ex->postfix_list, print_expr_item);
+call    0 never executed
+    #####:  567:	printf("\n");
+call    0 never executed
+        -:  568:}
+        -:  569:
+function parser_print_expr_postfix called 0 returned 0% blocks executed 0%
+    #####:  570:void parser_print_expr_postfix(PARSER*parser, EXPR *ex)
+        -:  571:{
+        -:  572:	
+    #####:  573:	if (!list_find_by_addr(parser->expr_list, ex)) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  574:		return;
+        -:  575:	};
+        -:  576:	
+    #####:  577:	list_foreach(ex->postfix_list, print_expr_item);
+call    0 never executed
+    #####:  578:	printf("\n");
+call    0 never executed
+        -:  579:}
+        -:  580:
+function print_stack_item called 0 returned 0% blocks executed 0%
+    #####:  581:void print_stack_item(void *data)
+        -:  582:{
+    #####:  583:	printf("%s ", (char*)data);
+call    0 never executed
+    #####:  584:}
+        -:  585:
+function print_stack called 0 returned 0% blocks executed 0%
+    #####:  586:void print_stack(PSTACK*stk)
+        -:  587:{
+    #####:  588:	printf("stack: ");
+call    0 never executed
+    #####:  589:	pstack_print(stk, print_stack_item);
+call    0 never executed
+    #####:  590:	printf("\n");	
+call    0 never executed
+    #####:  591:}
+        -:  592:
+function parser_create_func_nocheck called 390 returned 100% blocks executed 70%
+      390:  593:FUNC *parser_create_func_nocheck(PARSER *parser, char *funcname, int argnum, double (*f)(double *args))
+        -:  594:{
+        -:  595:	FUNC *newf;
+        -:  596:	FUNC *oldf;
+        -:  597:
+        -:  598:	/* already exists? */
+      390:  599:	oldf = (FUNC*)find_item_by_name(parser->fun_list, (void*)funcname);
+call    0 returned 390
+        -:  600:
+      390:  601:	if (oldf) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 390
+    #####:  602:		return oldf;
+        -:  603:	}
+        -:  604:
+      390:  605:	newf = (FUNC*)malloc(sizeof(FUNC));
+      390:  606:	if (!newf) return NULL;
+branch  0 taken 0 (fallthrough)
+branch  1 taken 390
+        -:  607:	
+      390:  608:	newf->name = funcname;
+      390:  609:	newf->type = function;
+      390:  610:	newf->loc  = f;
+      390:  611:	newf->argnum = argnum;
+        -:  612:	
+      390:  613:	if (!list_add(parser->fun_list, (void*)newf)) {
+call    0 returned 390
+branch  1 taken 0 (fallthrough)
+branch  2 taken 390
+    #####:  614:		free(newf);
+    #####:  615:		return NULL;
+        -:  616:	}
+        -:  617:	
+      390:  618:	return newf;
+        -:  619:}
+        -:  620:
+function parser_create_func called 0 returned 0% blocks executed 0%
+    #####:  621:FUNC *parser_create_func(PARSER *parser, char *funcname, int argnum, double (*f)(double *args) )
+        -:  622:{
+        -:  623:	FUNC *newf;
+        -:  624:	FUNC *oldf;
+        -:  625:	int k;
+        -:  626:
+    #####:  627:	if (!parser) {
+branch  0 never executed
+branch  1 never executed
+    #####:  628:		return NULL;
+        -:  629:	};
+        -:  630:	
+    #####:  631:	parser->error = pe_ok; 
+        -:  632:
+    #####:  633:	if (!(isascii(funcname[0]) && isalpha(funcname[0]))) {
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:  634:		parser->error = pe_invalidname;
+    #####:  635:		return NULL;
+        -:  636:	};
+        -:  637:	
+    #####:  638:	for (k = 1; k < strlen(funcname); k++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  639:		if (!((isascii(funcname[k]) && isalnum(funcname[k])) || funcname[k]=='_')) {
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  640:			parser->error = pe_invalidname;
+    #####:  641:			return NULL;
+        -:  642:		};
+        -:  643:	};
+        -:  644:
+        -:  645:	/* already exists? */
+    #####:  646:	oldf = (FUNC*)find_item_by_name(parser->fun_list, (void*)funcname);
+call    0 never executed
+    #####:  647:	if (oldf) {
+branch  0 never executed
+branch  1 never executed
+    #####:  648:		return oldf;
+        -:  649:	};
+        -:  650:
+        -:  651:
+    #####:  652:	oldf = (FUNC*)find_item_by_name(parser->var_list, (void*)funcname);
+call    0 never executed
+    #####:  653:	if (oldf) {
+branch  0 never executed
+branch  1 never executed
+    #####:  654:		parser->error = pe_nameconflict;
+    #####:  655:		return NULL;
+        -:  656:	};
+        -:  657:
+    #####:  658:	oldf = (FUNC*)find_item_by_name(parser->const_list, (void*)funcname);
+call    0 never executed
+    #####:  659:	if (oldf) {
+branch  0 never executed
+branch  1 never executed
+    #####:  660:		parser->error = pe_nameconflict;
+    #####:  661:		return NULL;
+        -:  662:	};
+        -:  663:	
+    #####:  664:	newf = (FUNC*)malloc(sizeof(FUNC));
+    #####:  665:	if (!newf) {
+branch  0 never executed
+branch  1 never executed
+    #####:  666:		parser->error = pe_nomemory;
+    #####:  667:		return NULL;
+        -:  668:	}
+        -:  669:	
+    #####:  670:	newf->name = funcname;
+    #####:  671:	newf->type = function;
+    #####:  672:	newf->loc  = f;
+    #####:  673:	newf->argnum = argnum;
+        -:  674:	
+    #####:  675:	if (!list_add(parser->fun_list, (void*)newf)) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  676:		free(newf);
+    #####:  677:		parser->error = pe_nomemory;
+    #####:  678:		return NULL;
+        -:  679:	}
+        -:  680:	
+    #####:  681:	return newf;
+        -:  682:}
+        -:  683:
+        -:  684:/*
+        -:  685:ITEM_TYPE token_type(PARSER*parser, char*tok)
+        -:  686:{
+        -:  687:	EXPR_ITEM ei;
+        -:  688:	
+        -:  689:	if (isdigit(tok[0]) || (tok[0] == '.')) 
+        -:  690:		return constant;
+        -:  691:		
+        -:  692:	if ((tok[0] == '(') || (tok[0] == ')')) 
+        -:  693:		return function;
+        -:  694:	
+        -:  695:	ei.name = tok;
+        -:  696:		
+        -:  697:	if (list_find_first(parser->var_list, (void*)&ei, check_item_name))
+        -:  698:		return variable;
+        -:  699:		
+        -:  700:	if (list_find_first(parser->fun_list, (void*)&ei, check_item_name))
+        -:  701:		return function;
+        -:  702:		
+        -:  703:	return unknownid;
+        -:  704:}
+        -:  705:*/
+        -:  706:
+function priority called 151 returned 100% blocks executed 89%
+      151:  707:int priority(char op1, char op2)
+        -:  708:{
+      151:  709:	if (op1 == ')')
+branch  0 taken 0 (fallthrough)
+branch  1 taken 151
+    #####:  710:		return -1;
+        -:  711:
+      151:  712:	if (op1 == '(' )
+branch  0 taken 70 (fallthrough)
+branch  1 taken 81
+       70:  713:		return 0;
+        -:  714:
+       81:  715:	if ((op1 != ')') && (op2 == '(') )
+branch  0 taken 81 (fallthrough)
+branch  1 taken 0
+branch  2 taken 59 (fallthrough)
+branch  3 taken 22
+       59:  716:		return 0;
+        -:  717:
+       22:  718:	if (isalpha(op2))
+call    0 returned 22
+branch  1 taken 0 (fallthrough)
+branch  2 taken 22
+    #####:  719:		return 0; /* function */
+        -:  720:
+       22:  721:	if (op2 == '^')
+branch  0 taken 5 (fallthrough)
+branch  1 taken 17
+        5:  722:		return 0;
+        -:  723:
+       17:  724:	if ((( op1 == '+') || (op1 == '-')) && ( (op2 == '*') || (op2 == '/')))
+branch  0 taken 12 (fallthrough)
+branch  1 taken 5
+branch  2 taken 4 (fallthrough)
+branch  3 taken 8
+branch  4 taken 6 (fallthrough)
+branch  5 taken 3
+branch  6 taken 4 (fallthrough)
+branch  7 taken 2
+        7:  725:		return 0;
+        -:  726:
+       10:  727:	return 1;
+        -:  728:}
+        -:  729:
+        -:  730:char *delims = "+-()^*/,";
+        -:  731:
+function find_item called 300 returned 100% blocks executed 100%
+      300:  732:EXPR_ITEM* find_item(PARSER*p, char*name)
+        -:  733:{
+        -:  734:	EXPR_ITEM * ei;
+        -:  735:
+      300:  736:	ei = find_item_by_name(p->var_list, name);
+call    0 returned 300
+      300:  737:	if (ei) 
+branch  0 taken 43 (fallthrough)
+branch  1 taken 257
+       43:  738:		return ei;
+        -:  739:
+      257:  740:	ei = find_item_by_name(p->fun_list, name);
+call    0 returned 257
+      257:  741:	if (ei) 
+branch  0 taken 248 (fallthrough)
+branch  1 taken 9
+      248:  742:		return ei;
+        -:  743:
+        9:  744:	return NULL;
+        -:  745:}
+        -:  746:
+function valid_const called 114 returned 100% blocks executed 94%
+      114:  747:int valid_const(char *cstr)
+        -:  748:{
+        -:  749:	int k;
+        -:  750:	int valid;
+        -:  751:	int dots;
+        -:  752:
+      114:  753:	dots = 0;
+      309:  754:	for (k = 0; k < strlen(cstr); k++) {
+branch  0 taken 196
+branch  1 taken 113 (fallthrough)
+      196:  755:		valid = (isdigit(cstr[k]) || (cstr[k] == '.'));
+call    0 returned 196
+branch  1 taken 15 (fallthrough)
+branch  2 taken 181
+branch  3 taken 15 (fallthrough)
+branch  4 taken 0
+      196:  756:		if (cstr[k] == '.')
+branch  0 taken 15 (fallthrough)
+branch  1 taken 181
+       15:  757:			dots++;
+      196:  758:		if (dots > 1)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 195
+        1:  759:			valid = 0;
+      196:  760:		if (!valid )
+branch  0 taken 1 (fallthrough)
+branch  1 taken 195
+        1:  761:			break;
+        -:  762:	};
+      114:  763:	return valid;
+        -:  764:}
+        -:  765:
+function parser_create_expr called 156 returned 100% blocks executed 88%
+      156:  766:EXPR* parser_create_expr(PARSER *parser, char *expr_str)
+        -:  767:{
+      156:  768:	EXPR *e = NULL;
+      156:  769:	char *e_str = NULL;
+      156:  770:	char *tmp = NULL, *tmpsave = NULL;
+      156:  771:	char *token = NULL;
+        -:  772:	int len, m, k, olen;
+        -:  773:	char c;
+        -:  774:	double v;
+      156:  775:	char ariff[2] = " ";
+      156:  776:	char *neg = "neg";
+      156:  777:	char *nul = "nul";
+      156:  778:	EXPR_ITEM *item = NULL;
+        -:  779:	int unop;
+      156:  780:	char *cname = NULL;
+        -:  781:	char cn[MAXCSTRLEN];
+        -:  782:
+      156:  783:	if (!parser)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 156
+    #####:  784:		return NULL;
+      156:  785:	if (!expr_str)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 156
+    #####:  786:		return NULL;
+        -:  787:
+      156:  788:	parser->error = pe_ok;
+        -:  789:
+      156:  790:	e = (EXPR*)malloc(sizeof(EXPR));
+      156:  791:	if (!e) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 156
+    #####:  792:		parser->error = pe_nomemory;
+    #####:  793:		goto clean_up;
+        -:  794:	}
+        -:  795:
+      156:  796:	e->postfix_list = list_create();
+call    0 returned 156
+        -:  797:	
+      156:  798:	if (!e->postfix_list) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 156
+    #####:  799:		parser->error = pe_nomemory;
+    #####:  800:		goto clean_up;
+        -:  801:	};
+        -:  802:
+        -:  803:	/* how many spaces we have? */
+        -:  804:	{
+      156:  805:		int spaces = 0;
+        -:  806:		int k;
+      156:  807:		olen = len = strlen(expr_str);
+        -:  808:		
+      883:  809:		for (k = 0; k < olen; k++) {
+branch  0 taken 727
+branch  1 taken 156 (fallthrough)
+      727:  810:			if (expr_str[k] == ' ') spaces++;
+branch  0 taken 0 (fallthrough)
+branch  1 taken 727
+        -:  811:		};
+      156:  812:		len -= spaces;
+        -:  813:	};
+        -:  814:	
+      156:  815:	e_str = (char*)malloc(len + 1); /* 1 for terminating \0 */
+      156:  816:	if (!e_str) { 
+branch  0 taken 0 (fallthrough)
+branch  1 taken 156
+    #####:  817:		parser->error = pe_nomemory;
+    #####:  818:		goto clean_up;
+        -:  819:	};
+        -:  820:
+      156:  821:	tmp = malloc(len + 1); /* 1 for terminating \0 */
+      156:  822:	tmpsave = tmp;
+      156:  823:	if (!tmp) { 
+branch  0 taken 0 (fallthrough)
+branch  1 taken 156
+    #####:  824:		parser->error = pe_nomemory;
+    #####:  825:		goto clean_up;
+        -:  826:	};
+        -:  827:	
+      156:  828:	e_str[len] = '\0';
+        -:  829:	
+      156:  830:	m = 0;
+      883:  831:	for (k = 0; k < olen; k++) {
+branch  0 taken 727
+branch  1 taken 156 (fallthrough)
+      727:  832:		if (expr_str[k] != ' ') {
+branch  0 taken 727 (fallthrough)
+branch  1 taken 0
+      727:  833:			e_str[m] = expr_str[k];
+      727:  834:			m++;
+        -:  835:		};
+        -:  836:	};
+        -:  837:	
+        -:  838:/*
+        -:  839:	checking brakets
+        -:  840:*/
+      156:  841:	pstack_clear(parser->stack);
+call    0 returned 156
+        -:  842:	
+      881:  843:	for (k = 0; k < len; k++) {
+branch  0 taken 727
+branch  1 taken 154 (fallthrough)
+      727:  844:		if (e_str[k] == '(') { 
+branch  0 taken 62 (fallthrough)
+branch  1 taken 665
+       62:  845:			if (pstack_full(parser->stack)) {
+call    0 returned 62
+branch  1 taken 0 (fallthrough)
+branch  2 taken 62
+    #####:  846:				parser->error = pe_exprtoocomp;
+    #####:  847:				goto clean_up;
+        -:  848:			};
+       62:  849:			pstack_push(parser->stack,tmp);
+call    0 returned 62
+        -:  850:		};
+      727:  851:		if (e_str[k] == ')') { 
+branch  0 taken 62 (fallthrough)
+branch  1 taken 665
+       62:  852:			if (pstack_empty(parser->stack)) {
+call    0 returned 62
+branch  1 taken 2 (fallthrough)
+branch  2 taken 60
+        2:  853:				parser->error = pe_syntax;
+        2:  854:				goto clean_up;
+        -:  855:			};
+       60:  856:			pstack_pop(parser->stack);
+call    0 returned 60
+        -:  857:		};
+        -:  858:	};
+        -:  859:
+      154:  860:	if (!pstack_empty(parser->stack)) {
+call    0 returned 154
+branch  1 taken 2 (fallthrough)
+branch  2 taken 152
+        2:  861:		parser->error = pe_syntax;
+        2:  862:		goto clean_up;
+        -:  863:	};
+        -:  864:	
+      152:  865:	e->infix_str = e_str;
+      152:  866:	strcpy(tmp, e_str);
+        -:  867:	
+        -:  868:	/* 
+        -:  869:		parsing expression string in infix notation
+        -:  870:		and create expression list in postfix notation
+        -:  871:	*/
+        -:  872:	
+      152:  873:	k = 0; /* position of first unparsed symbol */
+      152:  874:	m = 0; /* flag for strtok() */
+      152:  875:	pstack_clear(parser->stack);
+call    0 returned 152
+        -:  876:	
+      152:  877:	while (k < len) {
+branch  0 taken 414
+branch  1 taken 140 (fallthrough)
+      414:  878:		c = e_str[k];
+      414:  879:		if (strchr(delims, (int)c)) {
+branch  0 taken 170 (fallthrough)
+branch  1 taken 244
+        -:  880:			/* it's an operation */
+      170:  881:			ariff[0] = c;
+      170:  882:			token = ariff;
+        -:  883:			
+        -:  884:			/* check for unary minus or plus */
+      170:  885:			if ((c == '-') || (c == '+') ) {
+branch  0 taken 158 (fallthrough)
+branch  1 taken 12
+branch  2 taken 12 (fallthrough)
+branch  3 taken 146
+       24:  886:				unop = ((!k) || ((k) && (!isalnum(e_str[k-1])) && ( e_str[k-1] != ')')));
+branch  0 taken 20 (fallthrough)
+branch  1 taken 4
+branch  2 taken 20 (fallthrough)
+branch  3 taken 0
+call    4 returned 20
+branch  5 taken 4 (fallthrough)
+branch  6 taken 16
+branch  7 taken 4 (fallthrough)
+branch  8 taken 0
+        -:  887:			};
+      170:  888:			k++;
+        -:  889:
+      170:  890:			if (unop) {
+branch  0 taken 140 (fallthrough)
+branch  1 taken 30
+      140:  891:				if ( c == '-' ) {
+branch  0 taken 6 (fallthrough)
+branch  1 taken 134
+        6:  892:					token = neg;
+        -:  893:				};
+      140:  894:				if ( c == '+' ) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 138
+        2:  895:					token = nul;
+        -:  896:				};
+        -:  897:			};
+        -:  898:		} else { /* it is a function, a variable or numeric constant */
+      244:  899:			if (m) {
+branch  0 taken 98 (fallthrough)
+branch  1 taken 146
+       98:  900:				token = strtok(NULL, delims);
+call    0 returned 98
+        -:  901:			} else {
+      146:  902:				token = strtok(tmp, delims);
+call    0 returned 146
+      146:  903:				m = 1;
+        -:  904:			};
+      244:  905:			k += strlen(token);
+        -:  906:		};
+        -:  907:		
+        -:  908:		/* check if it is constant */
+      525:  909:		if ((token[0] == '.') || (isdigit(token[0]))) {
+branch  0 taken 410 (fallthrough)
+branch  1 taken 4
+call    2 returned 410
+branch  3 taken 110 (fallthrough)
+branch  4 taken 300
+        -:  910:			EXPR_ITEM *ei;
+      114:  911:			if (!valid_const(token)) {
+call    0 returned 114
+branch  1 taken 1 (fallthrough)
+branch  2 taken 113
+        1:  912:				parser->error = pe_invalidconst;
+        1:  913:				goto clean_up;
+        -:  914:			};
+      113:  915:			if (!sscanf(token, "%lf", &v)) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 111
+        2:  916:				parser->error = pe_invalidconst;
+        2:  917:				goto clean_up;
+        -:  918:			};
+        -:  919:			
+      111:  920:			ei = find_item_by_val(parser->const_list, v);
+call    0 returned 111
+        -:  921:
+      111:  922:			if (!ei) {
+branch  0 taken 46 (fallthrough)
+branch  1 taken 65
+       46:  923:				cname = (char*)malloc(parser->const_nmlen);
+       46:  924:				if (!cname) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 46
+    #####:  925:					parser->error = pe_nomemory;
+    #####:  926:					goto clean_up;
+        -:  927:				};
+        -:  928:
+       46:  929:				if (parser->last_const == parser->maxconst) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 46
+    #####:  930:					parser->error = pe_constarrfull;
+    #####:  931:					goto clean_up;
+        -:  932:				};
+        -:  933:				
+       46:  934:				strcpy(cname, cprefix);
+       46:  935:				sprintf(cn,"%d", parser->last_const);
+       46:  936:				strcat(cname,cn);
+        -:  937:				
+       46:  938:				parser->const_arr[parser->last_const] = v;
+        -:  939:				
+       46:  940:				ei = parser_addconst(parser, cname, &parser->const_arr[parser->last_const]);
+call    0 returned 46
+       46:  941:				parser->last_const++;
+        -:  942:				
+       46:  943:				if (!ei) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 46
+    #####:  944:					parser->error = pe_nomemory;
+    #####:  945:					goto clean_up;
+        -:  946:				};
+        -:  947:				
+        -:  948:			};
+      111:  949:			item = ei;
+        -:  950:		} else {
+      300:  951:			item = find_item(parser, token);
+call    0 returned 300
+        -:  952:		};
+        -:  953:		
+      411:  954:		if (!item) {
+branch  0 taken 9 (fallthrough)
+branch  1 taken 402
+        9:  955:			parser->error = pe_unknownid;
+        9:  956:			goto clean_up;
+        -:  957:		};
+        -:  958:		
+      402:  959:		switch ( item->type ) {
+branch  0 taken 154
+branch  1 taken 248
+branch  2 taken 0
+branch  3 taken 0
+        -:  960:		
+        -:  961:	case constant:
+        -:  962:	case variable:
+      154:  963:		if (!list_add(e->postfix_list, (void*)item)) {
+call    0 returned 154
+branch  1 taken 0 (fallthrough)
+branch  2 taken 154
+    #####:  964:			parser->error = pe_nomemory;
+    #####:  965:			goto clean_up;
+        -:  966:		};
+      154:  967:	break;
+        -:  968:		
+        -:  969:	case function:
+        -:  970:		while (1) {
+        -:  971:			EXPR_ITEM * otop;
+      258:  972:			if (pstack_empty(parser->stack))
+call    0 returned 258
+branch  1 taken 107 (fallthrough)
+branch  2 taken 151
+      107:  973:				break;
+      151:  974:			otop = (EXPR_ITEM*)pstack_peek(parser->stack);
+call    0 returned 151
+      151:  975:			if (!priority(otop->name[0],item->name[0]))
+call    0 returned 151
+branch  1 taken 141 (fallthrough)
+branch  2 taken 10
+      141:  976:				break;
+       10:  977:			otop = (EXPR_ITEM*)pstack_pop(parser->stack);
+call    0 returned 10
+       10:  978:			if (!list_add(e->postfix_list, (void*)otop)) {
+call    0 returned 10
+branch  1 taken 0 (fallthrough)
+branch  2 taken 10
+    #####:  979:				parser->error = pe_nomemory;
+    #####:  980:				goto clean_up;
+        -:  981:			};
+       10:  982:		};
+      248:  983:		if (item->name[0] != ')') {
+branch  0 taken 188 (fallthrough)
+branch  1 taken 60
+        -:  984://			if (pstack_full(parser->stack) ) {
+        -:  985://				parser->error = pe_stack_overflow;
+        -:  986://				goto clean_up;
+        -:  987://			};
+      188:  988:			pstack_push(parser->stack, item);
+call    0 returned 188
+        -:  989:		} else {
+        -:  990://			if (pstack_empty(parser->stack) ) {
+        -:  991://				parser->error = pe_syntax; /* ??? */
+        -:  992://				goto clean_up;
+        -:  993://			};
+       60:  994:			pstack_pop(parser->stack); /* throw away '('*/
+call    0 returned 60
+        -:  995:		};
+      248:  996:	break;
+        -:  997:	
+        -:  998:	/* never happen */
+        -:  999:	case unknownid:
+    #####: 1000:		parser->error = pe_bug;
+    #####: 1001:		goto clean_up;
+        -: 1002:	break;
+        -: 1003:		}; /* */
+        -: 1004:		
+        -: 1005:	}; /* while there are tokens */
+        -: 1006:
+      397: 1007:	while (!pstack_empty(parser->stack)) {
+call    0 returned 257
+branch  1 taken 117
+branch  2 taken 140 (fallthrough)
+      117: 1008:		EXPR_ITEM * op = pstack_pop(parser->stack);
+call    0 returned 117
+      117: 1009:		if ( !list_add(e->postfix_list, op) ) {
+call    0 returned 117
+branch  1 taken 0 (fallthrough)
+branch  2 taken 117
+    #####: 1010:			parser->error = pe_nomemory;
+    #####: 1011:			goto clean_up;
+        -: 1012:		};
+        -: 1013:	};
+        -: 1014:
+        -: 1015:	{
+      140: 1016:		PARSER_ERROR aaa = valid_expr(parser, e);
+call    0 returned 140
+      140: 1017:		if (aaa != pe_ok) {
+branch  0 taken 25 (fallthrough)
+branch  1 taken 115
+       25: 1018:			parser->error = aaa;
+       25: 1019:			goto clean_up;
+        -: 1020:		};
+        -: 1021:	}
+        -: 1022:	
+      115: 1023:	if (!list_add(parser->expr_list, (void*)e)) {
+call    0 returned 115
+branch  1 taken 0 (fallthrough)
+branch  2 taken 115
+    #####: 1024:		parser->error = pe_nomemory;
+    #####: 1025:		goto clean_up;
+        -: 1026:	};
+      115: 1027:	return e;
+        -: 1028:
+        -: 1029:clean_up:
+        -: 1030:
+       41: 1031:	if (tmpsave)
+branch  0 taken 41 (fallthrough)
+branch  1 taken 0
+       41: 1032:		free(tmpsave);
+       41: 1033:	if (e_str)
+branch  0 taken 41 (fallthrough)
+branch  1 taken 0
+       41: 1034:		free(e_str);
+       41: 1035:	if (e->postfix_list )
+branch  0 taken 41 (fallthrough)
+branch  1 taken 0
+       41: 1036:		list_delete(e->postfix_list, NULL);
+call    0 returned 41
+       41: 1037:	if (e)
+branch  0 taken 41 (fallthrough)
+branch  1 taken 0
+       41: 1038:		free(e);
+       41: 1039:	return NULL;
+        -: 1040:}
+        -: 1041:
+function valid_expr called 140 returned 100% blocks executed 82%
+      140: 1042:PARSER_ERROR valid_expr(PARSER *parser, EXPR *ex)
+        -: 1043:{
+      140: 1044:	double *tmp = NULL;
+        -: 1045:	LIST_ITEM *itemp;
+        -: 1046:	EXPR_ITEM *cei;
+        -: 1047:	int k;
+        -: 1048:
+        -: 1049:	int argnum;
+        -: 1050:
+      140: 1051:	itemp = ex->postfix_list->top;
+      140: 1052:	pstack_clear(parser->stack);
+call    0 returned 140
+        -: 1053:
+      535: 1054:	while (itemp) {
+branch  0 taken 280
+branch  1 taken 115 (fallthrough)
+      280: 1055:		cei = (EXPR_ITEM*)itemp->data;
+      280: 1056:		switch (cei->type) {
+branch  0 taken 153
+branch  1 taken 127
+branch  2 taken 0
+branch  3 taken 0
+        -: 1057:
+        -: 1058:		case constant:
+        -: 1059:		case variable:
+      153: 1060:			if (pstack_full(parser->stack)) {
+call    0 returned 153
+branch  1 taken 0 (fallthrough)
+branch  2 taken 153
+    #####: 1061:				return pe_exprtoocomp;
+        -: 1062:			};
+      153: 1063:			pstack_push(parser->stack, tmp);
+call    0 returned 153
+      153: 1064:		break;
+        -: 1065:
+        -: 1066:		case function:
+      127: 1067:			argnum = abs(cei->argnum);
+      267: 1068:			for (k = argnum - 1; k >= 0; k--) {
+branch  0 taken 165
+branch  1 taken 102 (fallthrough)
+      165: 1069:				if (pstack_empty(parser->stack)) {
+call    0 returned 165
+branch  1 taken 25 (fallthrough)
+branch  2 taken 140
+       25: 1070:					return pe_syntax;
+        -: 1071:				};
+      140: 1072:				pstack_pop(parser->stack);
+call    0 returned 140
+        -: 1073:			};
+      102: 1074:			if (pstack_full(parser->stack)) {
+call    0 returned 102
+branch  1 taken 0 (fallthrough)
+branch  2 taken 102
+    #####: 1075:				return pe_exprtoocomp;
+        -: 1076:			};
+      102: 1077:			pstack_push(parser->stack, tmp);
+call    0 returned 102
+      102: 1078:		break;
+        -: 1079:
+        -: 1080:		case unknownid:
+    #####: 1081:			printf("BUG: unknown item id\n");
+call    0 never executed
+    #####: 1082:			exit(1);
+call    0 never executed
+        -: 1083:		break;
+        -: 1084:		}
+      255: 1085:		itemp = itemp->next;
+        -: 1086:	};
+        -: 1087:
+      115: 1088:	if (pstack_empty(parser->stack))
+call    0 returned 115
+branch  1 taken 0 (fallthrough)
+branch  2 taken 115
+    #####: 1089:		return pe_syntax;
+      115: 1090:	pstack_pop(parser->stack);
+call    0 returned 115
+      115: 1091:	if (!pstack_empty(parser->stack))
+call    0 returned 115
+branch  1 taken 0 (fallthrough)
+branch  2 taken 115
+    #####: 1092:		return pe_syntax;
+        -: 1093:
+      115: 1094:	return pe_ok;
+        -: 1095:}
+        -: 1096:
+function parser_eval_expr called 115 returned 100% blocks executed 88%
+      115: 1097:double parser_eval_expr(PARSER *parser, EXPR *ex)
+        -: 1098:{
+        -: 1099:	double *tmp;
+        -: 1100:	LIST_ITEM *itemp;
+        -: 1101:	EXPR_ITEM *cei;
+        -: 1102:	int k;
+        -: 1103:	double (*op)(double*);
+        -: 1104:	double (*mlop)(double);
+        -: 1105:	
+        -: 1106:	int ind, argnum;
+        -: 1107:	
+      115: 1108:	if (!parser)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 115
+    #####: 1109:		return 0;
+      115: 1110:	if (!ex)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 115
+    #####: 1111:		return 0;
+        -: 1112:
+      115: 1113:	itemp = ex->postfix_list->top;
+      115: 1114:	ind = 0;
+        -: 1115:
+      115: 1116:	pstack_clear(parser->stack);
+call    0 returned 115
+        -: 1117:
+      485: 1118:	while (itemp) {
+branch  0 taken 255
+branch  1 taken 115 (fallthrough)
+      255: 1119:		cei = (EXPR_ITEM*)itemp->data;
+      255: 1120:		switch (cei->type) {
+branch  0 taken 153
+branch  1 taken 102
+branch  2 taken 0
+branch  3 taken 0
+        -: 1121:
+        -: 1122:		case constant:
+        -: 1123:		case variable:
+        -: 1124:			/* error? */
+      153: 1125:			pstack_push(parser->stack, cei->loc);
+call    0 returned 153
+      153: 1126:		break;
+        -: 1127:
+        -: 1128:		case function:
+      102: 1129:			argnum = abs(cei->argnum);
+      242: 1130:			for (k = argnum-1; k >= 0; k--) {
+branch  0 taken 140
+branch  1 taken 102 (fallthrough)
+      140: 1131:				tmp = pstack_pop(parser->stack);
+call    0 returned 140
+      140: 1132:				parser->fargs[k] = *(double*)tmp;
+        -: 1133:			};
+      102: 1134:			if (cei->argnum == -1) {
+branch  0 taken 52 (fallthrough)
+branch  1 taken 50
+       52: 1135:				mlop = cei->loc;
+       52: 1136:				parser->imres[ind] = mlop(parser->fargs[0]);
+call    0 returned 52
+        -: 1137:			} else {
+       50: 1138:				op = cei->loc;
+       50: 1139:				parser->imres[ind] = op(parser->fargs);
+call    0 returned 50
+        -: 1140:			}
+      102: 1141:			pstack_push(parser->stack, &parser->imres[ind]);
+call    0 returned 102
+      102: 1142:			ind++;
+      102: 1143:		break;
+        -: 1144:
+        -: 1145:		case unknownid:
+    #####: 1146:		break;
+        -: 1147:		}
+      255: 1148:		itemp = itemp->next;
+        -: 1149:	}
+      115: 1150:	tmp = pstack_pop(parser->stack);
+call    0 returned 115
+      115: 1151:	return *tmp;
+        -: 1152:}
+        -: 1153:
+function delete_expr called 115 returned 100% blocks executed 100%
+      115: 1154:void delete_expr(void *ex)
+        -: 1155:{
+        -: 1156:	/* what to do with char *infix_str ?*/
+      115: 1157:	EXPR *exp = (EXPR*)ex;
+      115: 1158:	LIST *exl = exp->postfix_list;
+      115: 1159:	list_delete(exl, NULL);
+call    0 returned 115
+        -: 1160:	/* 
+        -: 1161:	 * no need to delete items since they are
+        -: 1162:	 * in var, func and const lists
+        -: 1163:	 */
+      115: 1164:}
+        -: 1165:
+function parser_delete called 15 returned 100% blocks executed 100%
+       15: 1166:void parser_delete(PARSER*parser)
+        -: 1167:{
+       15: 1168:	list_delete(parser->expr_list, delete_expr);
+call    0 returned 15
+       15: 1169:	list_delete(parser->var_list, delete_expr_item);
+call    0 returned 15
+       15: 1170:	list_delete(parser->fun_list, delete_expr_item);
+call    0 returned 15
+       15: 1171:	list_delete(parser->const_list, delete_expr_item); 
+call    0 returned 15
+        -: 1172:
+       15: 1173:	free(parser->const_arr);
+       15: 1174:	free(parser->imres);
+       15: 1175:	free(parser->fargs);
+       15: 1176:	pstack_delete(parser->stack);
+call    0 returned 15
+        -: 1177:	
+       15: 1178:	free(parser);
+       15: 1179:}

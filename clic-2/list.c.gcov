@@ -1,0 +1,139 @@
+        -:    0:Source:list.c
+        -:    0:Programs:4
+        -:    1:
+        -:    2:#include <stdlib.h>
+        -:    3:#include "list.h"
+        -:    4:
+function list_create called 216 returned 100% blocks executed 75%
+      216:    5:LIST *list_create()
+        -:    6:{
+        -:    7:	LIST *list;
+      216:    8:	list = (LIST*)malloc(sizeof(LIST));
+      216:    9:	if (!list)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 216
+    #####:   10:		return NULL;
+      216:   11:	list->items = 0;
+      216:   12:	list->top = NULL;
+      216:   13:	list->last = NULL;
+      216:   14:	return list;
+        -:   15:}
+        -:   16:
+function list_add called 871 returned 100% blocks executed 78%
+      871:   17:LIST_ITEM *list_add(LIST *list, void *data)
+        -:   18:{
+        -:   19:	LIST_ITEM *p;
+        -:   20:
+      871:   21:	if (!list)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 871
+    #####:   22:		return NULL;
+        -:   23:	
+      871:   24:	p = (LIST_ITEM*)malloc(sizeof(LIST_ITEM));
+      871:   25:	if (!p)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 871
+    #####:   26:		return NULL;
+        -:   27:
+      871:   28:	p->next = NULL;
+      871:   29:	p->data = data;
+        -:   30:	
+      871:   31:	if (!list->top) {
+branch  0 taken 195 (fallthrough)
+branch  1 taken 676
+      195:   32:		list->top = p;
+        -:   33:	} else {
+      676:   34:		list->last->next = p;
+        -:   35:	};
+        -:   36:
+      871:   37:	list->last = p;
+      871:   38:	list->items++;
+      871:   39:	return p;
+        -:   40:}
+        -:   41:
+function list_foreach called 25 returned 100% blocks executed 100%
+       25:   42:void list_foreach(LIST *list, int (*dothis)(void*))
+        -:   43:{
+        -:   44:	LIST_ITEM * p;
+        -:   45:	
+       25:   46:	p = list->top;
+      193:   47:	while (p) {
+branch  0 taken 143
+branch  1 taken 25 (fallthrough)
+      143:   48:		if (dothis)
+branch  0 taken 143 (fallthrough)
+branch  1 taken 0
+      143:   49:			dothis(p->data);
+call    0 returned 143
+      143:   50:		p = p->next;
+        -:   51:	}
+       25:   52:}
+        -:   53:
+function list_find_first called 1202 returned 100% blocks executed 100%
+     1202:   54:void *list_find_first(LIST *list, void *sample, int (*match)(void*, void*))
+        -:   55:{
+        -:   56:	LIST_ITEM * p;
+     1202:   57:	int m = 0;
+        -:   58:
+     1202:   59:	p = list->top;
+    10743:   60:	while (p) {
+branch  0 taken 8718
+branch  1 taken 823 (fallthrough)
+     8718:   61:		m = match(sample, p->data);
+call    0 returned 8718
+     8718:   62:		if (m)
+branch  0 taken 379 (fallthrough)
+branch  1 taken 8339
+      379:   63:			break;
+     8339:   64:		p = p->next;
+        -:   65:	}
+     1202:   66:	return (m)?(p->data):NULL;
+branch  0 taken 379 (fallthrough)
+branch  1 taken 823
+        -:   67:}
+        -:   68:
+function list_find_by_addr called 0 returned 0% blocks executed 0%
+    #####:   69:void *list_find_by_addr(LIST *list, void *addr)
+        -:   70:{
+        -:   71:	LIST_ITEM * p;
+        -:   72:
+    #####:   73:	p = list->top;
+    #####:   74:	while (p) {
+branch  0 never executed
+branch  1 never executed
+    #####:   75:		if (addr == p->data)
+branch  0 never executed
+branch  1 never executed
+    #####:   76:			break;
+    #####:   77:		p = p->next;
+        -:   78:	}
+    #####:   79:	return (p)?(p->data):NULL;
+branch  0 never executed
+branch  1 never executed
+        -:   80:}
+        -:   81:
+function list_delete called 216 returned 100% blocks executed 100%
+      216:   82:void list_delete(LIST *list, void (*delete_item)(void *data))
+        -:   83:{
+        -:   84:	LIST_ITEM *p, *q;
+      216:   85:	p = list->top;
+        -:   86:
+     1303:   87:	while (p) {
+branch  0 taken 871
+branch  1 taken 216 (fallthrough)
+      871:   88:		q = p->next;
+      871:   89:		if ((delete_item) && (p->data)) {
+branch  0 taken 590 (fallthrough)
+branch  1 taken 281
+branch  2 taken 590 (fallthrough)
+branch  3 taken 0
+      590:   90:			delete_item(p->data);
+call    0 returned 590
+        -:   91:		};
+      871:   92:		free(p);
+      871:   93:		p = q;
+        -:   94:	};
+        -:   95:
+      216:   96:	free(list);
+      216:   97:	return;
+        -:   98:}

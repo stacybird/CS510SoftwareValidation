@@ -1,0 +1,206 @@
+        -:    0:Source:main.c
+        -:    0:Programs:4
+        -:    1:
+        -:    2:#include <stdio.h>
+        -:    3:#include <stdlib.h>
+        -:    4:#include <sys/time.h>
+        -:    5:#include <unistd.h>
+        -:    6:#include <math.h>
+        -:    7:#include <readline/readline.h>
+        -:    8:#include <readline/history.h>
+        -:    9:#include "parser.h"
+        -:   10:
+        -:   11:#define MAX_USER_VARS 1024
+        -:   12:#define MAX_ID_LEN 64
+        -:   13:
+        -:   14:struct user_var {
+        -:   15:	char name[MAX_ID_LEN + 1];
+        -:   16:	double val;
+        -:   17:} vars[MAX_USER_VARS];
+        -:   18:
+        -:   19:int slot = 0;
+        -:   20:
+        -:   21:PARSER *p;
+        -:   22:EXPR *expr;
+        -:   23:
+function main called 15 returned 100% blocks executed 89%
+       15:   24:int main(void)
+        -:   25:{
+       15:   26:	char *es = NULL;
+        -:   27:	int k;
+        -:   28:
+    15375:   29:	for (k = 0; k < MAX_USER_VARS; k++) {
+branch  0 taken 15360
+branch  1 taken 15 (fallthrough)
+    15360:   30:		memset(vars[k].name, 0, MAX_ID_LEN + 1);
+    15360:   31:		vars[k].val = 0;
+        -:   32:	};
+        -:   33:
+       15:   34:	p = parser_create(512, 128, 128, 512);
+call    0 returned 15
+       15:   35:	if (!p) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:   36:		printf("Error creating parser\n");
+call    0 never executed
+    #####:   37:		return 1;
+        -:   38:	};
+        -:   39:
+       15:   40:	using_history();
+call    0 returned 15
+       15:   41:	printf("Type '\\h' to get some help\n");
+call    0 returned 15
+        -:   42:
+        -:   43:	while (1) {
+        -:   44:		char *cp1, *cp2;
+        -:   45:		double r;
+        -:   46:		char *infix;
+        -:   47:
+      204:   48:		if (es)
+branch  0 taken 189 (fallthrough)
+branch  1 taken 15
+      189:   49:			free(es);
+      204:   50:		es = readline("clic2> ");
+call    0 returned 204
+      204:   51:		if (!es)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 204
+    #####:   52:			continue;
+      204:   53:		if (!*es)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 203
+        1:   54:			continue;
+      203:   55:		add_history(es);
+call    0 returned 203
+        -:   56:
+        -:   57:		/* special command */
+      203:   58:		if ((strlen(es) == 2) && (es[0] == '\\')) {
+branch  0 taken 58 (fallthrough)
+branch  1 taken 145
+branch  2 taken 44 (fallthrough)
+branch  3 taken 14
+       44:   59:			switch (es[1]) {
+branch  0 taken 15
+branch  1 taken 8
+branch  2 taken 4
+branch  3 taken 13
+branch  4 taken 2
+branch  5 taken 2
+        -:   60:			case 'q':
+       15:   61:				goto __end;
+        -:   62:			case 'v': 
+        8:   63:				parser_print_varlist(p);
+call    0 returned 8
+        8:   64:				continue;
+        -:   65:			case 'f': 
+        4:   66:				parser_print_funclist(p);
+call    0 returned 4
+        4:   67:				continue;
+        -:   68:			case 'c': 
+       13:   69:				parser_print_constlist(p);
+call    0 returned 13
+       13:   70:				continue;
+        -:   71:			case 'h': 
+        2:   72:				printf("\\v - variable list\n\\f - function list\n\\q - quit\n");
+call    0 returned 2
+        2:   73:				continue;
+        -:   74:			default:
+        2:   75:				printf("---unknown command\n");
+call    0 returned 2
+        2:   76:				continue;
+        -:   77:			}
+        -:   78:		}
+        -:   79:
+      159:   80:		cp1 = strchr(es, '=');
+      159:   81:		cp2 = strrchr(es, '=');
+      159:   82:		if (cp1 != cp2) {
+branch  0 taken 3 (fallthrough)
+branch  1 taken 156
+        3:   83:			printf("---more than one '='\n");
+call    0 returned 3
+        3:   84:			continue;
+        -:   85:		}
+        -:   86:
+      156:   87:		infix = es;
+        -:   88:
+        -:   89:		/* we have some assignment */
+      156:   90:		if (cp1) {
+branch  0 taken 35 (fallthrough)
+branch  1 taken 121
+       35:   91:			cp1[0] = 0;
+       35:   92:			cp1++;
+        -:   93:
+        -:   94:			/**
+        -:   95:			 *  TODO: add macro support
+        -:   96:			 **/
+        -:   97:
+       35:   98:			if (slot == MAX_USER_VARS) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 35
+    #####:   99:				printf("---no more space left for variables\n");
+call    0 never executed
+    #####:  100:				continue;
+        -:  101:			}
+       35:  102:			if (strlen(es) > MAX_ID_LEN) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 35
+    #####:  103:				printf("---identifier is too long\n");
+call    0 never executed
+    #####:  104:				continue;
+        -:  105:			}
+       35:  106:			memset(vars[slot].name, 0, MAX_ID_LEN + 1);
+       35:  107:			strcpy(vars[slot].name, es);
+       35:  108:			infix = cp1;
+        -:  109:		}
+        -:  110:
+        -:  111:		/* calculate the expression */
+      156:  112:		expr = parser_create_expr(p, infix);
+call    0 returned 156
+      156:  113:		if (!expr) {
+branch  0 taken 41 (fallthrough)
+branch  1 taken 115
+       41:  114:			printf("---%s\n", parser_errorstr(p->error));
+call    0 returned 41
+call    1 returned 41
+       41:  115:			continue;
+        -:  116:		};
+        -:  117:
+        -:  118:		/** 
+        -:  119:		 * uncomment the line below to see expressions in postfix notation
+        -:  120:		 */
+        -:  121:		// parser_print_expr_postfix(p, expr);
+        -:  122:
+      115:  123:		r = parser_eval_expr(p, expr);
+call    0 returned 115
+        -:  124:
+      115:  125:		if (cp1) {
+branch  0 taken 33 (fallthrough)
+branch  1 taken 82
+        -:  126:			VAR *v;
+       33:  127:			int exists = 0;
+       33:  128:			v = parser_create_var(p, vars[slot].name, &vars[slot].val, &exists);
+call    0 returned 33
+       33:  129:			if (!v) {
+branch  0 taken 10 (fallthrough)
+branch  1 taken 23
+       10:  130:				printf("---%s\n", parser_errorstr(p->error));
+call    0 returned 10
+call    1 returned 10
+       10:  131:				continue;
+        -:  132:			}
+       23:  133:			*(double*)v->loc = r;
+       23:  134:			if (!exists) /* new var */
+branch  0 taken 9 (fallthrough)
+branch  1 taken 14
+        9:  135:				slot++;
+        -:  136:		};
+        -:  137:
+      105:  138:		printf("%.6f\n", r);
+call    0 returned 105
+      189:  139:	};
+        -:  140:
+        -:  141:      __end:
+       15:  142:	parser_delete(p);
+call    0 returned 15
+       15:  143:	return 0;
+        -:  144:}

@@ -1,0 +1,65 @@
+Test Run By swatts on Fri Apr 24 12:23:25 2015
+Native configuration is x86_64-unknown-linux-gnu
+
+		===  tests ===
+
+Schedule of variations:
+    unix
+
+Running target unix
+Running ./test.exp ...
+PASS: 
+PASS: 
+PASS: 1
+PASS: 1
+PASS: 123
+FAIL: 8
+PASS: 
+PASS: 
+PASS: 1
+PASS: 8
+PASS: 1
+PASS: abc
+PASS: 123
+PASS: 1
+PASS: 234
+PASS: 6
+PASS: 
+PASS: 7
+PASS: 
+PASS: 3
+PASS: 2
+PASS: 5
+PASS: 
+PASS: 
+PASS: 2
+PASS: 7
+PASS: 4
+PASS: a
+PASS: 3
+PASS: 6
+PASS: 1
+PASS: 123
+PASS: 1
+PASS: 234
+PASS: 3
+PASS: 4
+PASS: 5
+PASS: 
+PASS: 
+PASS: 3
+PASS: 4
+PASS: 1
+PASS: 5
+PASS: 6
+PASS: 7
+PASS: 8
+PASS: 9
+PASS: 1
+PASS: 12
+PASS: 10
+
+		=== data_structure Summary ===
+
+# of expected passes		49
+# of unexpected failures	1

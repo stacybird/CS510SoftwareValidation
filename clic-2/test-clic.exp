@@ -1,0 +1,34 @@
+# Stacy Watts
+# test file for assignment 1, testing the clic tool
+# CS 510 pdx.edu  Spring 2015
+
+set tool "clic"
+set srcdir .
+set CLIC "./clic"
+set timeout 1
+set prompt "clic2> "
+spawn $CLIC;
+
+#expect "Type '\h' to get some help"  { send "\\h\r" }
+
+
+set testdata {
+    {""    [$prompt]}
+    {"1+1\r"    "2.000000"}
+    {"1+a\r"    "unknown identifier"}
+    {"\\h\r"    [concat "\\v - variable list\r\n\\f - function list\r\n\\q - quit" $prompt]}
+}
+
+# global CLIC
+foreach pattern $testdata {
+    set inputs   [lindex $pattern 0]
+    set expected [lindex $pattern 1]
+
+#    eval "spawn $CLIC $inputs"
+    send $inputs
+    expect {
+        $expected { pass $inputs }
+        default   { fail $inputs }
+        timeout   { puts "Operation timed out!"}
+    }
+}

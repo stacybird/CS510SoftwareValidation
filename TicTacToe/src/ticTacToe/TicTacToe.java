@@ -118,8 +118,9 @@ public class TicTacToe {
 
     /**
      * Models a TicTacToe board
+     * Changed to package local for testing, grr.  -Stacy
      */
-    private static class Board {
+    static class Board {
 
         /**
          * The default empty board
@@ -226,8 +227,9 @@ public class TicTacToe {
          * Returns a string representation of a TicTacToe board
          * @param someBoard
          * @return
+         * made package local for testing, bah -Stacy
          */
-        private String drawBoard(char[][] someBoard)
+        String drawBoard(char[][] someBoard)
         {
             String boardChars = " ___ ___ ___ \n";
             for(int row = 0; row < someBoard.length; row++)

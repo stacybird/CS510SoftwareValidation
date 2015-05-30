@@ -11,7 +11,7 @@ public class FormatPhoneNumberTest extends PhoneNumberFieldTest {
     String expected;
     private int[] phone;
     private int[] extension;
-    
+
     @Test
     public void sevenDigitPhoneNumberWithoutExtension() throws Exception {
         phone = new int[] {4,7,2,9,5,0,1};
@@ -47,4 +47,15 @@ public class FormatPhoneNumberTest extends PhoneNumberFieldTest {
         result = pnf.formatPhoneNumber(phone, extension);
         assertEquals(expected, result);
     }
+
+    @Test(expected = IllegalStateException.class)
+    public void invalidLength() throws Exception {
+        phone = new int[] {1,5,0,3,4,7,2,9,5};
+        extension = new int[] {5,0,0,0};
+        expected = "+1 (503) 472-9501 ext. 5000";
+        result = pnf.formatPhoneNumber(phone, extension);
+
+        assertEquals(expected, result);
+    }
+
 }

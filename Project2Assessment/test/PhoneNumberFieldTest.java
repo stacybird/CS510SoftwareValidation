@@ -34,7 +34,6 @@ public class PhoneNumberFieldTest {
     @Before
     public void setUp() throws Exception {
         System.out.print("\t\tStarting test.....\n");
-        pnf = new PhoneNumberField();
     }
 
     @After
@@ -42,6 +41,7 @@ public class PhoneNumberFieldTest {
         System.out.print("\t\t.....test has ended\n");
     }
 
+/*
     @Test
     public void testGetPhoneNumber() throws Exception {
 
@@ -56,4 +56,5 @@ public class PhoneNumberFieldTest {
     public void testParseContentsForPhoneNumber() throws Exception {
 
     }
+*/
 }

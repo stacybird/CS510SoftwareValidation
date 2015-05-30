@@ -1,8 +1,4 @@
-package Project2Assessment.test;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import static org.junit.Assert.*;
 
@@ -21,17 +17,8 @@ import static org.junit.Assert.*;
  *  -- Any particular test ends, and
  *  -- Test of this class ends.
  */
-public class FormatPhoneNumberTest {
+public class FormatPhoneNumberTest extends PhoneNumberFieldTest {
 
-    @Before
-    public void setUp() throws Exception {
-        System.out.print("\t\tStarting test.....\n");
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        System.out.print("\t\t.....test has ended\n");
-    }
 
     @Test
     public void sevenDigitPhoneNumberWithoutExtension() throws Exception {

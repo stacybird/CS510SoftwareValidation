@@ -13,26 +13,26 @@ public class FormatPhoneNumberTest extends PhoneNumberFieldTest {
     @Test
     public void sevenDigitPhoneNumberWithoutExtension() throws Exception {
         testNumber = "4729501";
-        pnf = new PhoneNumberField(testNumber);
+        newPhoneField(testNumber);
         assertEquals(testNumber, pnf.contents);
     }
 
     @Test
     public void tenDigitPhoneNumberWithoutExtension() throws Exception {
         testNumber = "5034729501";
-        pnf = new PhoneNumberField(testNumber);
+        newPhoneField(testNumber);
         assertEquals(testNumber, pnf.contents);
     }
     @Test
     public void elevenDigitPhoneNumberWithoutExtension() throws Exception {
         testNumber = "15034729501";
-        pnf = new PhoneNumberField(testNumber);
+        newPhoneField(testNumber);
         assertEquals(testNumber, pnf.contents);
     }
     @Test
     public void elevenDigitPhoneNumberWithExtension() throws Exception {
         testNumber = "150347295015000";
-        pnf = new PhoneNumberField(testNumber);
+        newPhoneField(testNumber);
         assertEquals(testNumber, pnf.contents);
     }
 }

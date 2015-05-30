@@ -41,6 +41,10 @@ public class PhoneNumberFieldTest {
         System.out.print("\t\t.....test has ended\n");
     }
 
+    public void newPhoneField(String number) {
+        pnf = new PhoneNumberField(number);
+    }
+
 /*
     @Test
     public void testGetPhoneNumber() throws Exception {

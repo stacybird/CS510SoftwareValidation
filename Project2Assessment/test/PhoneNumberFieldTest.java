@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 public class PhoneNumberFieldTest {
 
     protected PhoneNumberField pnf;
+    String testNumber;
 
     @BeforeClass
     public static void runBeforeClass() {
@@ -45,11 +46,34 @@ public class PhoneNumberFieldTest {
         pnf = new PhoneNumberField(number);
     }
 
+    @Test
+    public void testConstructorNoParam() {
+        pnf = new PhoneNumberField();
+        assertEquals("", pnf.contents);
+    }
+
+    @Test
+    public void testConstructorOneParam() {
+        testNumber = "150347295015000";
+        newPhoneField(testNumber);
+        assertEquals(testNumber, pnf.contents);
+    }
+
 /*
+Test fails; digits is never set.
+
     @Test
     public void testGetPhoneNumber() throws Exception {
+        testNumber = "150347295015000";
+        newPhoneField(testNumber);
+        pnf.getPhoneNumber();
+        assertEquals(testNumber,pnf.digits);
 
     }
+
+*/
+
+/*
 
     @Test
     public void testFormatPhoneNumber() throws Exception {

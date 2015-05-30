@@ -13,12 +13,12 @@ public class FormatPhoneNumberTest {
 
     @Before
     public void setUp() throws Exception {
-
+        System.out.print("\t\tStarting test.....\n");
     }
 
     @After
     public void tearDown() throws Exception {
-
+        System.out.print("\t\t.....test has ended\n");
     }
 
     @Test

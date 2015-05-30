@@ -39,9 +39,11 @@ public class FormatPhoneNumberTest extends PhoneNumberFieldTest {
 
     @Test
     public void elevenDigitPhoneNumberWithoutExtension() throws Exception {
-        testNumber = "15034729501";
-        newPhoneField(testNumber);
-        assertEquals(testNumber, pnf.contents);
+        phone = new int[] {1,5,0,3,4,7,2,9,5,0,1};
+        extension = new int[] {};
+        expected = "+1 (503) 472-9501";
+        result = pnf.formatPhoneNumber(phone, extension);
+        assertEquals(expected, result);
     }
 
     @Test

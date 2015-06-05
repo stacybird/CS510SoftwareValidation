@@ -1,21 +1,38 @@
+Stacy Watts
+CS 510 Software Validation
+Demo 4 (Klee)
+ 
 Part1:
 
 Task-b:
 ============================
-klee-vm@vm:~/klee-native/demo/get_sign$ llvm-gcc --emit-llvm -c -g get_sigzn.c -o get_sign.bc
+with the assume:
+stacy@Avar:~/prj4$ llvm-gcc -I ../klee/include --emit-llvm -c -g kmp.c -o kmp.bc
+
+With the assume removed:
+stacy@Avar:~/prj4$ llvm-gcc --emit-llvm -c -g kmp.c -o kmp.bc
 ============================
 
 Task-c:
 ============================
-klee-vm@vm:~/klee-native/demo/get_sign$ klee get_sign.bc
-...
-KLEE: done: total instructions = 51
-KLEE: done: completed paths = 3
-KLEE: done: generated tests = 3
+I briefly used a klee_assume to go with the '\0' as the final character, but 
+given your mention of needing to time out for path explosion, I decided to give 
+you a time-out value instead.  Here you go:
+
+stacy@Avar:~/prj4$ klee --max-time=60 kmp.bc
+KLEE: HaltTimer invoked
+KLEE: halting execution, dumping remaining states
+
+KLEE: done: total instructions = 53683
+KLEE: done: completed paths = 1396
+KLEE: done: generated tests = 1396
 ============================
 
 Task-d:
 ============================
+
+
+
 klee-vm@vm:~/klee-native/demo/get_sign$ ktest-tool klee-last/test000001.ktest
 ktest file : 'klee-last/test000001.ktest'
 args       : ['get_sign.bc']

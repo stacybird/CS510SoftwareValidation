@@ -1,0 +1,15 @@
+KLEE: WARNING ONCE: function "vasnprintf" has inline asm
+KLEE: WARNING: undefined reference to function: __ctype_b_loc
+KLEE: WARNING: undefined reference to function: __xstat64
+KLEE: WARNING: undefined reference to function: fdopendir
+KLEE: WARNING: undefined reference to function: lseek64
+KLEE: WARNING: undefined reference to function: signbitl
+KLEE: WARNING: executable has module level assembly (ignoring)
+KLEE: WARNING ONCE: calling external: syscall(16, 0, 21505, 71726048)
+KLEE: WARNING ONCE: calling __user_main with extra arguments.
+KLEE: WARNING ONCE: calling external: __xstat64(1, 71591904, 71759280)
+KLEE: WARNING ONCE: calling external: vprintf(71509584, 73178240)
+KLEE: WARNING ONCE: skipping fork (max-forks reached)
+KLEE: WARNING ONCE: calling close_stdout with extra arguments.
+KLEE: WARNING ONCE: calling external: fdopendir(3)
+KLEE: WARNING ONCE: calling external: __ctype_b_loc()

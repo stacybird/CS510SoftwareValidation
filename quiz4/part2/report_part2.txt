@@ -6,17 +6,15 @@ Part2:
 
 *** to preface - I am so sorry I overwrote my du.bc in class.  Makes this run a snowflake.  :-(  Sorry about that.
 ***  all run again df rather than du (since I no longer have a du.bc, and it would take too long to recompile during class.)
-
-This is what still need doing, it is recompiling now:
-... verify that configure worked ...
-obj-llvm$ make CC=/full/path/to/klee/scripts/klee-gcc
-obj-llvm$ make -C src arch hostname CC=/full/path/to/klee/scripts/klee-gcc
-... verify that make worked ...
+***  Correction, I was wrong, I got coreutils recompiled in a new directory :-)
 
 Task-a:
 ============================
+stacy@Avar:~/CS510SoftwareValidation/quiz4/part2$ klee --max-forks=200  --libc=uclibc --posix-runtime ./du.bc --sym-arg 3
 
-
+KLEE: done: total instructions = 170818
+KLEE: done: completed paths = 201
+KLEE: done: generated tests = 201
 ============================
 
 Task-b:

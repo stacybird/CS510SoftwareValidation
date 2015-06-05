@@ -43,6 +43,9 @@ int main(int argc, char** argv)
   char a[TEXTLEN];
   char b[PATTLEN];
 
+  klee_make_symbolic(&a, sizeof(a), "a");
+  klee_make_symbolic(&b, sizeof(b), "b");
+
   printf("res: %s\n", kmp_search(a, b));
 }
 

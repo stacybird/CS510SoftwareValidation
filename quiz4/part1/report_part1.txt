@@ -30,24 +30,24 @@ KLEE: done: generated tests = 1393
 
 Task-d:
 ============================
-
-
-
-klee-vm@vm:~/klee-native/demo/get_sign$ ktest-tool klee-last/test000001.ktest
-ktest file : 'klee-last/test000001.ktest'
-args       : ['get_sign.bc']
-num objects: 1
+stacy@Avar:~/CS510SoftwareValidation/quiz4/part1$ ktest-tool klee-out-0/test001239.ktest 
+ktest file : 'klee-out-0/test001239.ktest'
+args       : ['kmp.bc']
+num objects: 2
 object    0: name: 'a'
-object    0: size: 4
-object    0: data: '\x00\x00\x00\x00'
+object    0: size: 10
+object    0: data: '\xff\xfe\x00\x00\x00\x00\x00\x00\x00\x00'
+object    1: name: 'b'
+object    1: size: 20
+object    1: data: '\xfe\xff\xff\xff\xfe\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 ============================
 
 Task-e:
 ============================
-klee-vm@vm:~/klee-native/demo/get_sign$ klee-stats klee-last/
--------------------------------------------------------------------------
-|   Path   |  Instrs|  Time(s)|  ICov(%)|  BCov(%)|  ICount|  TSolver(%)|
--------------------------------------------------------------------------
-|klee-last/|      51|     0.02|    37.50|    22.22|      88|       92.24|
--------------------------------------------------------------------------
+stacy@Avar:~/CS510SoftwareValidation/quiz4/part1$ klee-stats klee-out-0/
+--------------------------------------------------------------------------
+|   Path    |  Instrs|  Time(s)|  ICov(%)|  BCov(%)|  ICount|  TSolver(%)|
+--------------------------------------------------------------------------
+|klee-out-0/|   54086|    73.34|    76.60|    53.33|     235|       84.54|
+--------------------------------------------------------------------------
 ============================

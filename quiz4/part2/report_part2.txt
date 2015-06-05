@@ -7,6 +7,7 @@ Part2:
 *** to preface - I am so sorry I overwrote my du.bc in class.  Makes this run a snowflake.  :-(  Sorry about that.
 ***  all run again df rather than du (since I no longer have a du.bc, and it would take too long to recompile during class.)
 ***  Correction, I was wrong, I got coreutils recompiled in a new directory :-)
+***  Took out the references to df, they should all be runs of du.  Enjoy!
 
 Task-a:
 ============================
@@ -19,50 +20,49 @@ KLEE: done: generated tests = 201
 
 Task-b:
 ============================
+stacy@Avar:~/coreutils-6.11/obj-gcov/src$ klee-replay ./du ~/CS510SoftwareValidation/quiz4/part2/klee-out-2/*.ktest
 
+26124	total
+klee-replay: EXIT STATUS: NORMAL (0 seconds)
 
-with the assume:
-stacy@Avar:~/prj4$ llvm-gcc -I ../klee/include --emit-llvm -c -g kmp.c -o kmp.bc
+klee-replay: TEST CASE: /home/stacy/CS510SoftwareValidation/quiz4/part2/klee-out-2/test000084.ktest
+klee-replay: ARGS: "./du" "-X" 
+./du: option requires an argument -- 'X'
+Try `./du --help' for more information.
+klee-replay: EXIT STATUS: ABNORMAL 1 (0 seconds)
 
-With the assume removed:
-stacy@Avar:~/prj4$ llvm-gcc --emit-llvm -c -g kmp.c -o kmp.bc
+crash!  :-)
+
+stacy@Avar:~/coreutils-6.11/obj-gcov/src$ RUNNING GDB: /usr/bin/gdb --pid 28433 -q --batch 
+klee-replay: EXIT STATUS: CRASHED signal 9 (75 seconds)
 ============================
 
 Task-c:
 ============================
-I briefly used a klee_assume to go with the '\0' as the final character, but 
-given your mention of needing to time out for path explosion, I decided to give 
-you a time-out value instead.  Here you go:
+stacy@Avar:~/coreutils-6.11/obj-gcov/src$ gcov -b du
+File '../../src/du.c'
+Lines executed:68.54% of 302
+Branches executed:77.89% of 190
+Taken at least once:59.47% of 190
+Calls executed:43.70% of 119
+../../src/du.c:creating 'du.c.gcov'
 
-stacy@Avar:~/prj4$ klee --max-time=60 kmp.bc
-KLEE: HaltTimer invoked
-KLEE: halting execution, dumping remaining states
+File '../../lib/stat-time.h'
+Lines executed:33.33% of 6
+No branches
+No calls
+../../lib/stat-time.h:creating 'stat-time.h.gcov'
 
-KLEE: done: total instructions = 54086
-KLEE: done: completed paths = 1393
-KLEE: done: generated tests = 1393
-============================
+File '../../src/system.h'
+Lines executed:0.00% of 3
+No branches
+Calls executed:0.00% of 1
+../../src/system.h:creating 'system.h.gcov'
 
-Task-d:
-============================
-stacy@Avar:~/CS510SoftwareValidation/quiz4/part1$ ktest-tool klee-out-0/test001239.ktest 
-ktest file : 'klee-out-0/test001239.ktest'
-args       : ['kmp.bc']
-num objects: 2
-object    0: name: 'a'
-object    0: size: 10
-object    0: data: '\xff\xfe\x00\x00\x00\x00\x00\x00\x00\x00'
-object    1: name: 'b'
-object    1: size: 20
-object    1: data: '\xfe\xff\xff\xff\xfe\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-============================
-
-Task-e:
-============================
-stacy@Avar:~/CS510SoftwareValidation/quiz4/part1$ klee-stats klee-out-0/
---------------------------------------------------------------------------
-|   Path    |  Instrs|  Time(s)|  ICov(%)|  BCov(%)|  ICount|  TSolver(%)|
---------------------------------------------------------------------------
-|klee-out-0/|   54086|    73.34|    76.60|    53.33|     235|       84.54|
---------------------------------------------------------------------------
+File '../../lib/timespec.h'
+Lines executed:100.00% of 4
+Branches executed:100.00% of 4
+Taken at least once:100.00% of 4
+No calls
+../../lib/timespec.h:creating 'timespec.h.gcov'
 ============================

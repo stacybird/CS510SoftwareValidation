@@ -1,0 +1,53 @@
+Stacy Watts
+CS 510 Software Validation
+Demo 4 (Klee)
+ 
+Part1:
+
+Task-b:
+============================
+with the assume:
+stacy@Avar:~/prj4$ llvm-gcc -I ../klee/include --emit-llvm -c -g kmp.c -o kmp.bc
+
+With the assume removed:
+stacy@Avar:~/prj4$ llvm-gcc --emit-llvm -c -g kmp.c -o kmp.bc
+============================
+
+Task-c:
+============================
+I briefly used a klee_assume to go with the '\0' as the final character, but 
+given your mention of needing to time out for path explosion, I decided to give 
+you a time-out value instead.  Here you go:
+
+stacy@Avar:~/prj4$ klee --max-time=60 kmp.bc
+KLEE: HaltTimer invoked
+KLEE: halting execution, dumping remaining states
+
+KLEE: done: total instructions = 54086
+KLEE: done: completed paths = 1393
+KLEE: done: generated tests = 1393
+============================
+
+Task-d:
+============================
+stacy@Avar:~/CS510SoftwareValidation/quiz4/part1$ ktest-tool klee-out-0/test001239.ktest 
+ktest file : 'klee-out-0/test001239.ktest'
+args       : ['kmp.bc']
+num objects: 2
+object    0: name: 'a'
+object    0: size: 10
+object    0: data: '\xff\xfe\x00\x00\x00\x00\x00\x00\x00\x00'
+object    1: name: 'b'
+object    1: size: 20
+object    1: data: '\xfe\xff\xff\xff\xfe\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+============================
+
+Task-e:
+============================
+stacy@Avar:~/CS510SoftwareValidation/quiz4/part1$ klee-stats klee-out-0/
+--------------------------------------------------------------------------
+|   Path    |  Instrs|  Time(s)|  ICov(%)|  BCov(%)|  ICount|  TSolver(%)|
+--------------------------------------------------------------------------
+|klee-out-0/|   54086|    73.34|    76.60|    53.33|     235|       84.54|
+--------------------------------------------------------------------------
+============================

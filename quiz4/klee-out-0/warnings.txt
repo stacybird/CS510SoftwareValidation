@@ -1,0 +1,4 @@
+KLEE: WARNING: undefined reference to function: printf
+KLEE: WARNING: undefined reference to function: puts
+KLEE: WARNING ONCE: calling external: printf(52866608, 52875952)
+KLEE: WARNING ONCE: calling external: puts(52864928)

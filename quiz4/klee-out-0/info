@@ -1,0 +1,21 @@
+klee --max-time=60 kmp.bc
+PID: 7216
+Started: 2015-06-05 11:44:29
+BEGIN searcher description
+<InterleavedSearcher> containing 2 searchers:
+RandomPathSearcher
+WeightedRandomSearcher::CoveringNew
+</InterleavedSearcher>
+END searcher description
+Finished: 2015-06-05 11:45:43
+Elapsed: 00:01:14
+KLEE: done: explored paths = 1393
+KLEE: done: avg. constructs per query = 86
+KLEE: done: total queries = 1476
+KLEE: done: valid queries = 66
+KLEE: done: invalid queries = 1410
+KLEE: done: query cex = 1476
+
+KLEE: done: total instructions = 54086
+KLEE: done: completed paths = 1393
+KLEE: done: generated tests = 1393

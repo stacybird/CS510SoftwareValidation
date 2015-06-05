@@ -1,0 +1,2 @@
+KLEE: ERROR: /home/stacy/CS510SoftwareValidation/quiz4/kmp.c:26: memory error: out of bound pointer
+KLEE: NOTE: now ignoring this error at this location

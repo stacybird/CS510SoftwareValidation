@@ -1,0 +1,13 @@
+Error: memory error: out of bound pointer
+File: /home/stacy/CS510SoftwareValidation/quiz4/kmp.c
+Line: 26
+assembly.ll line: 201
+Stack: 
+	#000000201 in kmp_search (text=52875952, pattern=52876832) at /home/stacy/CS510SoftwareValidation/quiz4/kmp.c:26
+	#100000243 in main (argc=1, argv=52696096) at /home/stacy/CS510SoftwareValidation/quiz4/kmp.c:49
+Info: 
+	address: 52875962
+	next: object at 52876832 of size 20
+		MO66[20] allocated at main():  %b = alloca [20 x i8]
+	prev: object at 52875952 of size 10
+		MO65[10] allocated at main():  %a = alloca [10 x i8]

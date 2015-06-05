@@ -23,9 +23,9 @@ stacy@Avar:~/prj4$ klee --max-time=60 kmp.bc
 KLEE: HaltTimer invoked
 KLEE: halting execution, dumping remaining states
 
-KLEE: done: total instructions = 53683
-KLEE: done: completed paths = 1396
-KLEE: done: generated tests = 1396
+KLEE: done: total instructions = 54086
+KLEE: done: completed paths = 1393
+KLEE: done: generated tests = 1393
 ============================
 
 Task-d:

@@ -1,0 +1,36 @@
+Part1:
+
+Task-b:
+============================
+klee-vm@vm:~/klee-native/demo/get_sign$ llvm-gcc --emit-llvm -c -g get_sigzn.c -o get_sign.bc
+============================
+
+Task-c:
+============================
+klee-vm@vm:~/klee-native/demo/get_sign$ klee get_sign.bc
+...
+KLEE: done: total instructions = 51
+KLEE: done: completed paths = 3
+KLEE: done: generated tests = 3
+============================
+
+Task-d:
+============================
+klee-vm@vm:~/klee-native/demo/get_sign$ ktest-tool klee-last/test000001.ktest
+ktest file : 'klee-last/test000001.ktest'
+args       : ['get_sign.bc']
+num objects: 1
+object    0: name: 'a'
+object    0: size: 4
+object    0: data: '\x00\x00\x00\x00'
+============================
+
+Task-e:
+============================
+klee-vm@vm:~/klee-native/demo/get_sign$ klee-stats klee-last/
+-------------------------------------------------------------------------
+|   Path   |  Instrs|  Time(s)|  ICov(%)|  BCov(%)|  ICount|  TSolver(%)|
+-------------------------------------------------------------------------
+|klee-last/|      51|     0.02|    37.50|    22.22|      88|       92.24|
+-------------------------------------------------------------------------
+============================

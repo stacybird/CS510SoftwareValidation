@@ -16,9 +16,9 @@ Bug 3:
 -- Line number: 64
 -- Explaination: uninitialized values being printed (x[j] is being copied over but contains nothing.)
 
-Bug 4:
--- Line number: 
--- Explaination:
+Bug 4: 
+-- Line number: 26
+-- Explaination: Heap buffer overflow - writing to x[k] overwites, because of the semicolon ending the for loop.
 
 Bug 5:
 -- Line number:

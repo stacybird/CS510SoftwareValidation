@@ -1,0 +1,35 @@
+There are 5 bugs in this program. 
+In the report, please include the line number and a brife explaination of each bug.
+
+Bug 1:
+-- Line number:
+-- Explaination:
+
+Bug 2:
+-- Line number:
+-- Explaination:
+
+Bug 3:
+-- Line number:
+-- Explaination:
+
+Bug 4:
+-- Line number:
+-- Explaination:
+
+Bug 5:
+-- Line number:
+-- Explaination:
+
+
+===============================================================================
+Please paste your bug-free code here:
+
+
+
+
+
+
+
+
+

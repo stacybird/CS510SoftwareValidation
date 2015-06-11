@@ -2,19 +2,19 @@ There are 5 bugs in this program.
 In the report, please include the line number and a brief explaination of each bug.
 
 Bug 1:
--- Line number:
--- Explaination:
+-- Line number: 25
+-- Explaination: memory is allocated using malloc, but never freed.  Memory leak.
 
 Bug 2:
--- Line number:
--- Explaination:
+-- Line number: 28 (46, 62)
+-- Explaination: Invalid write error: The program write the index (0) value to the first byte of a malloced memory chunk.  It shouldn't be writing the index, it should be writing the value at the index.  
 
 Bug 3:
--- Line number:
--- Explaination:
+-- Line number: 64
+-- Explaination: uninitialized values being printed (x[j] is being copied over but contains nothing.)
 
 Bug 4:
--- Line number:
+-- Line number: 
 -- Explaination:
 
 Bug 5:

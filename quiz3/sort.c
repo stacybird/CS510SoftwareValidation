@@ -32,7 +32,7 @@ void sort_sub (char *a, int n, int m)
     }
     for (i = 0; i < n; i++) 
     {
-        a[i] = x[i++];
+        a[i] = x[i];
     }
     free(x);
 }

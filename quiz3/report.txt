@@ -1,5 +1,5 @@
 There are 5 bugs in this program. 
-In the report, please include the line number and a brife explaination of each bug.
+In the report, please include the line number and a brief explaination of each bug.
 
 Bug 1:
 -- Line number:

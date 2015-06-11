@@ -62,7 +62,7 @@ int main ()
 
     sort(a, n);
     for (i = 0; i < n; i++)
-        printf("%d ", a[i]);
+        printf("%c ", a[i]);
     printf("\n");
     return 0;
 }

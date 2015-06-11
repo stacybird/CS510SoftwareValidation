@@ -10,7 +10,7 @@ Bug 1:
 
 Bug 2:
 -- Line number: 28 (46, 62)
--- Explaination: Invalid write error: The program write the index (0) value to the first byte of a malloced memory chunk.  It shouldn't be writing the index, it should be writing the value at the index.  
+-- Explaination: Invalid write error: The program write the index (0) value to the first byte of a malloced memory chunk. 
 
 Bug 3:
 -- Line number: 64
@@ -21,8 +21,8 @@ Bug 4:
 -- Explaination: Heap buffer overflow - writing to x[k] overwites, because of the semicolon ending the for loop.
 
 Bug 5:
--- Line number:
--- Explaination:
+-- Line number: 35
+-- Explaination: It should just copy directly, not increment the location to copy from in x first.
 
 
 ===============================================================================

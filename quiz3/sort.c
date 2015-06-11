@@ -34,6 +34,7 @@ void sort_sub (char *a, int n, int m)
     {
         a[i] = x[i++];
     }
+    free(x)
 }
  
 void sort (char *a, int n) 
